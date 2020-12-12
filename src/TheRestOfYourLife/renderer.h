@@ -5,6 +5,7 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <functional>
 
 #include "rtweekend.h"
 
@@ -21,7 +22,8 @@ class Renderer
 public:
     Renderer(unsigned int w, unsigned int h, camera& cam): cam(cam), image_width(w), image_height(h) {}
 
-    void render(int lineFrom = 0, int lineTo = -1);
+    void render(int lineFrom, int lineTo, std::function<void(int,int,double)> progressFunc);
+    void render(int lineFrom = 0, int lineTo = -1) {render(lineFrom, lineTo, [](int, int, double) {});}
     void renderMultiThreaded(unsigned char N = 4);
 
     color ray_color(const ray& r, int depth) {return ray_color(r, depth, make_shared<hittable_pdf>(nullptr, point3(0.0, 0.0, 0.0)));}
@@ -47,7 +49,7 @@ private:
     std::mutex imageMutex;
 };
 
-void Renderer::render(int lineFrom, int lineTo)  {
+void Renderer::render(int lineFrom, int lineTo, std::function<void(int,int,double)> progressFunc)  {
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
     auto imageSize = 3*image_width*image_height;
 
@@ -62,7 +64,7 @@ void Renderer::render(int lineFrom, int lineTo)  {
     auto _lights_pdf = make_shared<hittable_pdf>(nullptr, point3(0.0, 0.0, 0.0));
     if(lineTo<0) lineTo = image_height -1;
     for (int j = lineTo; j >= lineFrom; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+        //std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             color pixel_color(0,0,0);
             for (int s = 0; s < samples_per_pixel; ++s) {
@@ -78,6 +80,10 @@ void Renderer::render(int lineFrom, int lineTo)  {
             image[pixel_ix+1] = pixel_color.y();
             image[pixel_ix+0] = pixel_color.z();
         }
+        int linesReady = abs(j - lineTo) + 1;
+        int linesAll = abs(lineTo-lineFrom) + 1;
+        double progress = linesReady/static_cast<double>(linesAll);
+        progressFunc(linesReady, linesAll, progress);
     }
 }
 
@@ -132,7 +138,10 @@ void Renderer::renderMultiThreaded(unsigned char N) {
         if(i==N-1) lineTo += image_height % N;
         lastLineEnd = lineTo;
         threads.emplace_back([=]() {
-            render(lineFrom, lineTo);
+            auto progressFunc = [=](int linesReady, int linesAll, double progress) {
+                std::cerr << "render thread[" << std::to_string(i) << "] progress: " << std::to_string(progress) << std::endl;
+            };
+            render(lineFrom, lineTo, progressFunc);
         });
     }
 

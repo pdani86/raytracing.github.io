@@ -30,6 +30,12 @@
 
 #include "renderer.h"
 
+class point_light
+{
+public:
+
+    point3 pos;
+};
 
 hittable_list cornell_box() {
     hittable_list objects;
@@ -66,8 +72,8 @@ int main() {
     const auto aspect_ratio = 1.0 / 1.0;
     const int image_width = 600;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 5;
-    const int max_depth = 5;
+    const int samples_per_pixel = 10;
+    const int max_depth = 10;
 
     // World
 
@@ -83,11 +89,12 @@ int main() {
     //world.add(heightmap0);
 
     //color background(0,0,0);
-    color background(0.5,0.5,0.5);
+    color background(0.2,0.2,0.2);
 
     // Camera
 
-    point3 lookfrom(278, 278, -800);
+    //point3 lookfrom(278, 278, -800);
+    point3 lookfrom(278, 600, -800);
     point3 lookat(278, 278, 0);
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10.0;
