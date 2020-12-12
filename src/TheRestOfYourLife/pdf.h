@@ -71,7 +71,7 @@ class cosine_pdf : public pdf {
 
 class hittable_pdf : public pdf {
     public:
-        hittable_pdf(shared_ptr<hittable> p, const point3& origin) : ptr(p), o(origin) {}
+        hittable_pdf(const shared_ptr<hittable>& p, const point3& origin) : ptr(p), o(origin) {}
 
         virtual double value(const vec3& direction) const override {
             return ptr->pdf_value(o, direction);
@@ -89,7 +89,7 @@ class hittable_pdf : public pdf {
 
 class mixture_pdf : public pdf {
     public:
-        mixture_pdf(shared_ptr<pdf> p0, shared_ptr<pdf> p1) {
+        mixture_pdf(const shared_ptr<pdf>& p0, const shared_ptr<pdf>& p1) {
             p[0] = p0;
             p[1] = p1;
         }

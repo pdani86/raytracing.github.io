@@ -20,6 +20,7 @@ set ( COMMON_ALL
   src/common/camera.h
   src/common/ray.h
   src/common/vec3.h
+  src/common/myutils.h
 )
 
 set ( SOURCE_ONE_WEEKEND
@@ -67,6 +68,8 @@ set ( SOURCE_REST_OF_YOUR_LIFE
   src/TheRestOfYourLife/pdf.h
   src/TheRestOfYourLife/sphere.h
   src/TheRestOfYourLife/main.cc
+  src/TheRestOfYourLife/heightmap.h
+  src/TheRestOfYourLife/triangle.h
 )
 
 # Executables
