@@ -70,6 +70,7 @@ set ( SOURCE_REST_OF_YOUR_LIFE
   src/TheRestOfYourLife/main.cc
   src/TheRestOfYourLife/heightmap.h
   src/TheRestOfYourLife/triangle.h
+  src/TheRestOfYourLife/renderer.h
 )
 
 # Executables

@@ -28,44 +28,7 @@
 #include "heightmap.h"
 
 
-color ray_color(
-    const ray& r,
-    const color& background,
-    const hittable& world,
-    shared_ptr<hittable> lights,
-    int depth
-) {
-    hit_record rec;
-
-    // If we've exceeded the ray bounce limit, no more light is gathered.
-    if (depth <= 0)
-        return color(0,0,0);
-
-    // If the ray hits nothing, return the background color.
-    if (!world.hit(r, 0.001, infinity, rec))
-        return background;
-
-    scatter_record srec;
-    color emitted = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
-
-    if (!rec.mat_ptr->scatter(r, rec, srec))
-        return emitted;
-
-    if (srec.is_specular) {
-        return srec.attenuation
-             * ray_color(srec.specular_ray, background, world, lights, depth-1);
-    }
-
-    auto light_ptr = make_shared<hittable_pdf>(lights, rec.p);
-    mixture_pdf p(light_ptr, srec.pdf_ptr);
-    ray scattered = ray(rec.p, p.generate(), r.time());
-    auto pdf_val = p.value(scattered.direction());
-
-    return emitted
-         + srec.attenuation * rec.mat_ptr->scattering_pdf(r, rec, scattered)
-                            * ray_color(scattered, background, world, std::move(lights), depth-1)
-                            / pdf_val;
-}
+#include "renderer.h"
 
 
 hittable_list cornell_box() {
@@ -95,60 +58,7 @@ hittable_list cornell_box() {
     return objects;
 }
 
-class Renderer
-{
-public:
-    Renderer(int w, int h, camera& cam): cam(cam), image_width(w), image_height(h) {}
 
-    void render(int lineFrom = 0, int lineTo = -1) {
-        std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-        int imageSize = 3*image_width*image_height;
-
-        {
-            std::lock_guard<std::mutex> lock(imageMutex);
-            if(imageSize != image.size()) {
-                image.resize(imageSize);
-                memset(image.data(), 0, image.size()*sizeof(double));
-            }
-        }
-
-        if(lineTo<0) lineTo = image_height -1;
-        for (int j = lineTo; j >= lineFrom; --j) {
-            std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-            for (int i = 0; i < image_width; ++i) {
-                color pixel_color(0,0,0);
-                for (int s = 0; s < samples_per_pixel; ++s) {
-                    double ru = (samples_per_pixel == 1)?0.0:random_double();
-                    double rv = (samples_per_pixel == 1)?0.0:random_double();
-                    auto u = (i + ru) / (image_width-1);
-                    auto v = (j + rv) / (image_height-1);
-                    ray r = cam.get_ray(u, v);
-                    pixel_color += ray_color(r, background, *world, lights, max_depth);
-                }
-                auto pixel_ix = image_width * 3 * j + 3 * i;
-                image[pixel_ix+2] = pixel_color.x();
-                image[pixel_ix+1] = pixel_color.y();
-                image[pixel_ix+0] = pixel_color.z();
-                //write_color(std::cout, pixel_color, samples_per_pixel);
-            }
-        }
-    }
-
-    std::vector<double>& getImage() {return image;}
-
-public:
-    int image_width = 100;
-    int image_height = 100;
-    int samples_per_pixel = 1;
-    color background;
-    shared_ptr<hittable> world;
-    int max_depth;
-    shared_ptr<hittable> lights;
-    camera cam;
-private:
-    std::vector<double> image;
-    std::mutex imageMutex;
-};
 
 int main() {
     // Image
@@ -156,7 +66,7 @@ int main() {
     const auto aspect_ratio = 1.0 / 1.0;
     const int image_width = 600;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 1;
+    const int samples_per_pixel = 5;
     const int max_depth = 5;
 
     // World
@@ -195,34 +105,15 @@ int main() {
     renderer.lights = lights;
 
     // Render
-    std::vector<std::thread> threads;
-    int lastLineStart = 0;
-    int lastLineEnd = -1;
-    const int N = 4;
-    for(int i=0; i<N; ++i) {
-        int lineFrom = lastLineEnd + 1;
-        int step = image_height/4;
-        int lineTo = lineFrom + step - 1;
-        if(i==N-1) lineTo += image_height % N;
-        lastLineStart = lineFrom;
-        lastLineEnd = lineTo;
-        threads.emplace_back(std::thread([=, &renderer]() {
-            renderer.render(lineFrom, lineTo);
-        }));
-
-    }
-
-
     using clock = std::chrono::steady_clock;
     auto startTime = clock::now();
 
-    for(int i = 0;i<threads.size(); ++i) {
-        threads[i].join();
-    }
+    const int threadNum = 4;
+    renderer.renderMultiThreaded(threadNum);
 
     auto endTime = clock::now();
-        auto dtUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime-startTime).count();
-        std::cerr << "timeUs: " << std::to_string(dtUs) << std::endl;
+    auto dtUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime-startTime).count();
+    std::cerr << "timeUs: " << std::to_string(dtUs) << std::endl;
 
     writeToImage(image_width, image_height, renderer.getImage(), samples_per_pixel);
 

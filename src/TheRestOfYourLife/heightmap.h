@@ -27,8 +27,6 @@ public:
             line.resize(x);
         }
         geometry = make_shared<hittable_list>();
-        //geometry->add(make_shared<sphere>(point3(0,0,0), 9 , material));
-        //geometry->add(make_shared<sphere>(point3(190, 90, 190), 4 , material));
         generateParabolaData();
         generateGeometry();
     }
@@ -69,9 +67,8 @@ inline void heightmap::generateGeometry() {
             geometry->add(make_shared<sphere>(
                               point3(
                                 x * step,
-                                  //map_data[y][x] * heightScale,
-                                  y * step,
-                                  map_data[y][x] * heightScale
+                                  map_data[y][x] * heightScale,
+                                  y * step
                                   )/* + offset*/,
                               step/2.0,
                               material
