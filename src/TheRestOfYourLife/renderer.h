@@ -118,6 +118,7 @@ color Renderer::ray_color(
         if(!curLightSphere) continue;
         auto dir = (curLightSphere->center - rec.p);
         auto dist = dir.length();
+        if(dist < 0.001) continue;
         ray toLight(rec.p, dir/dist);
         hit_record light_hit;
         if(world->hit(toLight, 0.001, dist - curLightSphere->radius - 0.001, light_hit)) continue;

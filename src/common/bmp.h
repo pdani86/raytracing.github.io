@@ -46,14 +46,65 @@ public:
         if(!out.is_open()) return false;
         auto dataSize = width * height * 3;
         BMP_FILE_HEADER file_header;
+        file_header.filesize = dataSize + file_header.dataOffset;
         out.write((char*)&file_header, sizeof(BMP_FILE_HEADER));
         BMP_INFO_HEADER info_header;
         info_header.bitmapDataSize = dataSize;
         info_header.bmWidth = width;
         info_header.bmHeight = height;
+        info_header.bitsPerPixel = 24;
         out.write((char*)&info_header, sizeof(BMP_INFO_HEADER));
         out.write((char*)data, dataSize);
         return true;
+    }
+
+    static bool saveBmpGray(std::string fname, unsigned char* data, int width, int height) {
+        static_assert (sizeof(BMP_FILE_HEADER) + sizeof(BMP_INFO_HEADER) == 54, "BMP HEADER SIZE != 54");
+        std::ofstream out;
+        out.open(fname, std::ios::binary | std::ios::out);
+        if(!out.is_open()) return false;
+        auto dataSize = width * height;
+        BMP_FILE_HEADER file_header;
+        file_header.filesize = dataSize + file_header.dataOffset;
+        out.write((char*)&file_header, sizeof(BMP_FILE_HEADER));
+        BMP_INFO_HEADER info_header;
+        info_header.bitmapDataSize = dataSize;
+        info_header.bmWidth = width;
+        info_header.bmHeight = height;
+        info_header.bitsPerPixel = 8;
+        out.write((char*)&info_header, sizeof(BMP_INFO_HEADER));
+        out.write((char*)data, dataSize);
+        return true;
+    }
+
+    static std::vector<unsigned char> mapToBytePerChannelNormalize(const std::vector<double>& in) {
+        std::vector<unsigned char> result;
+        result.resize(in.size());
+        double max = 0.0;
+        for(int i=0; i < in.size(); ++i) {
+            if(in[i]>max) max = in[i];
+        }
+        double scale = 255.0 / max;
+
+        for(int i=0; i < in.size(); ++i) {
+            auto val = in[i];
+            val *= scale;
+            if(val>255)    val = 255;
+            else if(val<0) val = 0;
+            result[i] = static_cast<unsigned char>(val);
+        }
+        return result;
+    }
+
+    static std::vector<unsigned char> grayToRGB(const std::vector<unsigned char>& gray) {
+        std::vector<unsigned char> result;
+        result.resize(3*gray.size());
+        for(int i=0;i<gray.size();++i) {
+            result[3*i+0] = gray[i];
+            result[3*i+1] = gray[i];
+            result[3*i+2] = gray[i];
+        }
+        return result;
     }
 
     static std::vector<unsigned char> mapToBytePerChannel(const std::vector<double>& in, double scale) { // TODO: stride

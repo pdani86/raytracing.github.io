@@ -25,6 +25,7 @@
 #include <thread>
 
 #include "heightmap.h"
+#include "film.h"
 
 #include "renderer.h"
 
@@ -73,7 +74,7 @@ int main() {
     const int image_width = 600;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     const int samples_per_pixel = 1;
-    const int max_depth = 1;
+    const int max_depth = 5;
 
     // World
 
@@ -88,9 +89,27 @@ int main() {
     int heightMapY = 30;
     int heightMapZ = 190;
     int blockSquareSize = 100;
-    //auto heightmap0 = make_shared<heightmap>(50, 50, make_shared<metal>(color(0.95, 0.95, 0.95), 0.0));
-    auto heightmap0 = make_shared<heightmap>(50,50,make_shared<lambertian>(color(1.0, 1.0, 1.0)));
-    world.add(make_shared<xz_rect>(
+    auto heightmap0 = make_shared<heightmap>(50, 50, make_shared<metal>(color(0.95, 0.95, 0.95), 0.0));
+    //auto heightmap0 = make_shared<heightmap>(50,50,make_shared<lambertian>(color(1.0, 1.0, 1.0)));
+
+    auto film0 = make_shared<film>(
+                point3(heightMapX - blockSquareSize/2, heightMapY + 70, heightMapZ - blockSquareSize/2),
+                vec3(1.0 * blockSquareSize, 0.0, 0.0),
+                vec3(0.0, 0.0, 1.0 * blockSquareSize),
+                1000,
+                1000
+                );
+    /*auto film0 = make_shared<film>(
+                point3(100, 100, 30),
+                vec3(200.0, 0.0, 0.0),
+                vec3(0.0, 100.0, 10.0 ),
+                1000,
+                1000
+                );*/
+
+    film0->mat = make_shared<lambertian>(color(1.0, 0.4, 0.3));
+    world.add(film0);
+    /*world.add(make_shared<xz_rect>(
                   heightMapX - blockSquareSize/2, heightMapX + blockSquareSize/2,
                   heightMapZ - blockSquareSize/2, heightMapZ + blockSquareSize/2,
                   heightMapY + 70,
@@ -101,12 +120,12 @@ int main() {
                   heightMapZ - blockSquareSize/2, heightMapZ + blockSquareSize/2,
                   heightMapY + 70.5,
                   make_shared<lambertian>(color(1.0, 1.0, 1.0))))
-              );
+              );*/
 
     world.add(make_shared<translate>(heightmap0,vec3(heightMapX, heightMapY,heightMapZ)));
 
-    //color background(0,0,0);
-    color background(0.05,0.05,0.05);
+    color background(0,0,0);
+    //color background(0.05,0.05,0.05);
 
     // Camera
 
@@ -134,12 +153,20 @@ int main() {
     using clock = std::chrono::steady_clock;
     auto startTime = clock::now();
 
-    const int threadNum = 4;
+    const int threadNum = 1;
     renderer.renderMultiThreaded(threadNum);
 
     auto endTime = clock::now();
     auto dtUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime-startTime).count();
     std::cerr << "timeUs: " << std::to_string(dtUs) << std::endl;
+
+    std::cerr << "film hit count: " << std::to_string(film0->hitCount) << std::endl;
+
+    auto normFilmData = BMP::mapToBytePerChannelNormalize(film0->pixelData);
+    auto normFilmDataRGB = BMP::grayToRGB(normFilmData);
+    //BMP::saveBmpGray("film.bmp", normFilmData.data(), film0->side1res, film0->side2res);
+    BMP::saveBmpRGB("film.bmp", normFilmDataRGB.data(), film0->side1res, film0->side2res);
+
 
 
     //writeToImage(image_width, image_height, renderer.getImage(), samples_per_pixel);
