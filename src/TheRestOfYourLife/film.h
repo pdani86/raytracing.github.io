@@ -58,7 +58,8 @@ bool film::hit(
     normal = normal / normalLen; // TODO: can be precalculated
     double num = dot(normal, corner - r.orig);
     double den = dot(normal, r.dir);
-    if(den<0.0001) return false;
+    if(fabs(den)<0.0001) return false;
+    //if(den > 0) return false; // TODO which side to allow (front face/back face)
     double t = num / den;
     if(t<t_min || t>t_max) return false;
     point3 hitPoint = r.orig + t * r.dir;
@@ -67,10 +68,12 @@ bool film::hit(
     vec3 cornerToHit = hitPoint - corner;
     vec3 uVec = side1 / side1Len;
     vec3 vVec = side2 / side2Len;
-    double u = dot(cornerToHit, uVec) / side1res;
-    double v = dot(cornerToHit, vVec) / side2res;
+    double u = dot(cornerToHit, uVec) / side1Len;
+    double v = dot(cornerToHit, vVec) / side2Len;
     if(u < 0) return false;
     if(v < 0) return false;
+    if(u>1.0) return false;
+    if(v>1.0) return false;
     int uCoord = u * side1res;
     int vCoord = v * side2res;
     if(uCoord>=side1res) return false;

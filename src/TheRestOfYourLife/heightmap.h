@@ -49,7 +49,7 @@ public:
     std::vector<std::vector<double>> map_data;
 
     double step = 5.0;
-    double heightScale = 0.2;
+    double heightScale = 1.0;
 };
 
 inline void heightmap::generateGeometry() {
@@ -62,18 +62,15 @@ inline void heightmap::generateGeometry() {
     double centerX = xSize/2.0;
     double centerY = ySize/2.0;
 
-    //vec3 offset(190.0, 90.0, 190.0);
-
     for(std::size_t y = 0; y < ySize; ++y) {
         for(std::size_t x = 0; x < xSize; ++x) {
-            //std::cerr << "add sphere: " << std::to_string(x*step) << ", " << std::to_string(y*step) << std::endl;
             geometry->add(make_shared<sphere>(
                               point3(
                                 (x - centerX) * step,
                                   map_data[y][x] * heightScale,
                                 (y - centerY) * step
-                                  )/* + offset*/,
-                              step * 3.0/* *0.5 */,
+                                  ),
+                              step * 1.5,
                               material
                               ));
         }
