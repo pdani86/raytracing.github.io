@@ -16,6 +16,7 @@
 #include "hittable_list.h"
 #include "color.h"
 #include "material.h"
+#include "sphere.h"
 
 class Renderer
 {
@@ -42,7 +43,7 @@ public:
     color background;
     shared_ptr<hittable> world;
     int max_depth = 20;
-    shared_ptr<hittable> lights;
+    shared_ptr<hittable_list> lights;
 
 private:
     std::vector<double> image;
@@ -103,10 +104,30 @@ color Renderer::ray_color(
         return background;
 
     scatter_record srec;
+
     color emitted = rec.mat_ptr->emitted(r, rec, rec.u, rec.v, rec.p);
 
     if (!rec.mat_ptr->scatter(r, rec, srec))
         return emitted;
+
+
+
+    color directLightSum;
+    for(auto& curLight : lights->objects) {
+        auto* curLightSphere = dynamic_cast<sphere*>(curLight.get());
+        if(!curLightSphere) continue;
+        auto dir = (curLightSphere->center - rec.p);
+        auto dist = dir.length();
+        ray toLight(rec.p, dir/dist);
+        hit_record light_hit;
+        if(world->hit(toLight, 0.001, dist - curLightSphere->radius - 0.001, light_hit)) continue;
+        //rec.mat_ptr->scattering_pdf()
+        //curLightSphere->pdf_value()
+        double sPdf = rec.mat_ptr->scattering_pdf(r, rec, toLight);
+        color lightColor(1.0, 1.0, 1.0);
+        directLightSum += lightColor * sPdf;
+    }
+
 
     _lights_pdf->ptr = lights;
     _lights_pdf->o = rec.p;
@@ -120,7 +141,7 @@ color Renderer::ray_color(
     ray scattered = ray(rec.p, p.generate(), r.time());
     auto pdf_val = p.value(scattered.direction());
 
-    return emitted
+    return emitted + directLightSum
          + srec.attenuation * rec.mat_ptr->scattering_pdf(r, rec, scattered)
                             * ray_color(scattered, depth-1, _lights_pdf)
                             / pdf_val;

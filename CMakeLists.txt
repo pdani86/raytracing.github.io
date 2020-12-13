@@ -58,6 +58,7 @@ set ( SOURCE_REST_OF_YOUR_LIFE
   src/common/perlin.h
   src/common/rtw_stb_image.h
   src/common/texture.h
+  src/common/bmp.h
   src/TheRestOfYourLife/aarect.h
   src/TheRestOfYourLife/box.h
   src/TheRestOfYourLife/bvh.h
@@ -71,6 +72,7 @@ set ( SOURCE_REST_OF_YOUR_LIFE
   src/TheRestOfYourLife/heightmap.h
   src/TheRestOfYourLife/triangle.h
   src/TheRestOfYourLife/renderer.h
+  src/TheRestOfYourLife/film.h
 )
 
 # Executables

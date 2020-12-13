@@ -30,6 +30,8 @@
 
 #include "renderer.h"
 
+#include "bmp.h"
+
 class point_light
 {
 public:
@@ -72,29 +74,48 @@ int main() {
     const auto aspect_ratio = 1.0 / 1.0;
     const int image_width = 600;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 10;
-    const int max_depth = 10;
+    const int samples_per_pixel = 1;
+    const int max_depth = 1;
 
     // World
 
     auto lights = make_shared<hittable_list>();
-    lights->add(make_shared<xz_rect>(213, 343, 227, 332, 554, shared_ptr<material>()));
+    //lights->add(make_shared<xz_rect>(213, 343, 227, 332, 554, shared_ptr<material>()));
     lights->add(make_shared<sphere>(point3(190, 90, 190), 90, shared_ptr<material>()));
+    //lights->add(make_shared<sphere>(point3(190, 500, 190), 90, shared_ptr<material>()));
+    //lights->add(make_shared<sphere>(point3(0, 10, 190), 90, shared_ptr<material>()));
 
     auto world = cornell_box();
-    //auto heightmap0 = make_shared<heightmap>(50,50,make_shared<metal>(color(0.8, 0.85, 0.88), 0.0));
+    int heightMapX = 190;
+    int heightMapY = 30;
+    int heightMapZ = 190;
+    int blockSquareSize = 100;
+    //auto heightmap0 = make_shared<heightmap>(50, 50, make_shared<metal>(color(0.95, 0.95, 0.95), 0.0));
     auto heightmap0 = make_shared<heightmap>(50,50,make_shared<lambertian>(color(1.0, 1.0, 1.0)));
-    world.add(make_shared<translate>(heightmap0,vec3(190,90,190)));
-    //world.add(make_shared<translate>(heightmap0,vec3(278,278,-200)));
-    //world.add(heightmap0);
+    world.add(make_shared<xz_rect>(
+                  heightMapX - blockSquareSize/2, heightMapX + blockSquareSize/2,
+                  heightMapZ - blockSquareSize/2, heightMapZ + blockSquareSize/2,
+                  heightMapY + 70,
+                  make_shared<lambertian>(color(1.0, 1.0, 1.0)))
+              );
+    world.add(make_shared<flip_face>(make_shared<xz_rect>(
+                  heightMapX - blockSquareSize/2, heightMapX + blockSquareSize/2,
+                  heightMapZ - blockSquareSize/2, heightMapZ + blockSquareSize/2,
+                  heightMapY + 70.5,
+                  make_shared<lambertian>(color(1.0, 1.0, 1.0))))
+              );
+
+    world.add(make_shared<translate>(heightmap0,vec3(heightMapX, heightMapY,heightMapZ)));
 
     //color background(0,0,0);
-    color background(0.2,0.2,0.2);
+    color background(0.05,0.05,0.05);
 
     // Camera
 
     //point3 lookfrom(278, 278, -800);
     point3 lookfrom(278, 600, -800);
+    //point3 lookfrom(278, 1400, -800);
+    //point3 lookfrom(278, 50, -800);
     point3 lookat(278, 278, 0);
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10.0;
@@ -122,7 +143,9 @@ int main() {
     auto dtUs = std::chrono::duration_cast<std::chrono::microseconds>(endTime-startTime).count();
     std::cerr << "timeUs: " << std::to_string(dtUs) << std::endl;
 
-    writeToImage(image_width, image_height, renderer.getImage(), samples_per_pixel);
+
+    //writeToImage(image_width, image_height, renderer.getImage(), samples_per_pixel);
+    BMP::saveBmpRGB("img.bmp", renderer.getImage(), image_width, image_height, 255.0/samples_per_pixel);
 
     std::cerr << "\nDone.\n";
 }
