@@ -24,9 +24,7 @@
 #include <mutex>
 #include <thread>
 
-#include "myutils.h"
 #include "heightmap.h"
-
 
 #include "renderer.h"
 
