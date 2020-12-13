@@ -78,7 +78,7 @@ shared_ptr<hittable> createHeightMap(const point3 lightPos) {
         double dx = (x - centerX);
         double dy = (y - centerY);
 
-        return (dx*dx + dy*dy) * 0.15 + std::sin(2*M_PI*(dx+dy)/40.0) * 15.0;
+        return (dx*dx + dy*dy) * 0.15 + std::cos(2*M_PI*(dx+dy)/40.0) * 15.0;
     });
     heightmap0->generateGeometry();
     return make_shared<translate>(heightmap0, lightPos + vec3(0.0, -30.0, 0.0));
@@ -90,8 +90,8 @@ int main() {
     const auto aspect_ratio = 1.0 / 1.0;
     const int image_width = 600;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 4;
-    const int max_depth = 9;
+    const int samples_per_pixel = 1;
+    const int max_depth = 1;
 
     // World
 
@@ -101,9 +101,12 @@ int main() {
     //lights->add(make_shared<xz_rect>(213, 343, 227, 332, 554, shared_ptr<material>()));
     lights->add(make_shared<sphere>(lightPos, 1, shared_ptr<material>()));
     //lights->add(make_shared<sphere>(lightPos + vec3(0.0, 600.0, 0.0), 1, shared_ptr<material>()));
+    lights->add(make_shared<sphere>(vec3(200.0, 100.0, -50.0), 1, shared_ptr<material>()));
     //lights->add(make_shared<sphere>(point3(190, 500, 190), 90, shared_ptr<material>()));
     //lights->add(make_shared<sphere>(point3(0, 10, 190), 90, shared_ptr<material>()));
     //auto dbgMarkerSphere = make_shared<sphere>(vec3(lightPos.x(), lightPos.y()+350, lightPos.z()), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
+    auto triangle0 = make_shared<triangle>(point3(50, 50, 50), point3(150, 50, 50), point3(150, 150, 50));
+    triangle0->mat = make_shared<lambertian>(color(1.0, 0.4, 0.3));
 
     auto world = cornell_box();
     int blockSquareSize = 80;
@@ -119,10 +122,10 @@ int main() {
                 1000
           );
 
-    std::cerr << "film corner: " << std::to_string(film0->corner.x()) << ", " << std::to_string(film0->corner.y()) << ", " << std::to_string(film0->corner.z()) << std::endl;
+    /*std::cerr << "film corner: " << std::to_string(film0->corner.x()) << ", " << std::to_string(film0->corner.y()) << ", " << std::to_string(film0->corner.z()) << std::endl;
     std::cerr << "film side1: " << std::to_string(film0->side1.x()) << ", " << std::to_string(film0->side1.y()) << ", " << std::to_string(film0->side1.z()) << std::endl;
     std::cerr << "film side2: " << std::to_string(film0->side2.x()) << ", " << std::to_string(film0->side2.y()) << ", " << std::to_string(film0->side2.z()) << std::endl;
-    std::cerr << "film side1res: " << std::to_string(film0->side1res) << std::endl;
+    std::cerr << "film side1res: " << std::to_string(film0->side1res) << std::endl;*/
 
     //world.add(dbgMarkerSphere);
     film0->mat = make_shared<lambertian>(color(1.0, 0.4, 0.3));
@@ -133,8 +136,9 @@ int main() {
                       lightPos.y() + 70,
                       make_shared<lambertian>(color(1.0, 1.0, 1.0)));
 
-    world.add(blockRect);
+    //world.add(blockRect);
     world.add(heightmap0);
+    world.add(triangle0);
 
     color background(0,0,0);
     //color background(0.05,0.05,0.05);
@@ -142,23 +146,23 @@ int main() {
     // Camera
 
     //point3 lookfrom(278, 278, -800);
-    //point3 lookfrom(278, 600, -800);
+    point3 lookfrom(278, 200, -800);
     //point3 lookfrom(555/2, 555/2, -800);
-    point3 lookfrom(555/2, 1400, -200);
+    //point3 lookfrom(555/2, 1400, -200);
     point3 lookat(555/2, 555/2, 552/2);
 
     vec3 vup(0, 1, 0);
     auto dist_to_focus = 10.0;
     auto aperture = 0.0;
-    auto vfov = 40.0;
+    auto vfov = 50.0;
     auto time0 = 0.0;
     auto time1 = 0.0;
 
     // ----
-    lookfrom = lightPos;
+    /*lookfrom = lightPos;
     vup = vec3(0.0, 0.0, 1.0);
     lookat = lookfrom + vec3(0.0, -1.0, 0.0);
-    vfov = 70.0;
+    vfov = 70.0;*/
     // ----
 
 
