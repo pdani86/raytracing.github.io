@@ -31,10 +31,22 @@
 
 #include "bmp.h"
 
-class point_light
+class spot_light
 {
 public:
+    ray getRay(double u, double v) {
+        ray r;
+        //r.
+        return r;
+    }
 
+    double getIntensity(double u, double v) {
+        return 0.0;
+    }
+
+public:
+    vec3 up;
+    vec3 dir;
     point3 pos;
 };
 
@@ -191,8 +203,6 @@ int main() {
     auto normFilmDataRGB = BMP::grayToRGB(normFilmData);
     //BMP::saveBmpGray("film.bmp", normFilmData.data(), film0->side1res, film0->side2res);
     BMP::saveBmpRGB("film.bmp", normFilmDataRGB.data(), film0->side1res, film0->side2res);
-
-
 
     //writeToImage(image_width, image_height, renderer.getImage(), samples_per_pixel);
     BMP::saveBmpRGB("img.bmp", renderer.getImage(), image_width, image_height, 255.0/samples_per_pixel);

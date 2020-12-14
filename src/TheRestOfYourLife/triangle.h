@@ -62,6 +62,8 @@ inline bool triangle::hit(
 }
 
 inline bool triangle::bounding_box(double time0, double time1, aabb& output_box) const {
+    output_box.maximum = a.maxCoords(b.maxCoords(c));
+    output_box.minimum = a.minCoords(b.minCoords(c));
     return true;
 }
 

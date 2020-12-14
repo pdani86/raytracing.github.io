@@ -62,9 +62,9 @@ inline void heightmap::generateGeometry() {
     double centerX = xSize/2.0;
     double centerY = ySize/2.0;
 
-    for(std::size_t y = 0; y < ySize; ++y) {
-        for(std::size_t x = 0; x < xSize; ++x) {
-            geometry->add(make_shared<sphere>(
+    for(std::size_t y = 0; y < ySize-1; ++y) {
+        for(std::size_t x = 0; x < xSize-1; ++x) {
+            /*geometry->add(make_shared<sphere>(
                               point3(
                                 (x - centerX) * step,
                                   map_data[y][x] * heightScale,
@@ -72,7 +72,19 @@ inline void heightmap::generateGeometry() {
                                   ),
                               step * 1.5,
                               material
-                              ));
+                              ));*/
+
+            point3 p1((x - centerX) * step, map_data[y][x] * heightScale, (y - centerY) * step);
+            point3 p2((x + 1 - centerX) * step, map_data[y][x+1] * heightScale, (y - centerY) * step);
+            point3 p3((x + 1 - centerX) * step, map_data[y+1][x+1] * heightScale, (y + 1 - centerY) * step);
+            point3 p4((x - centerX) * step, map_data[y+1][x] * heightScale, (y + 1 - centerY) * step);
+
+            auto newTriangle1 = make_shared<triangle>(p1,p2,p3));
+            auto newTriangle2 = make_shared<triangle>(p1,p3,p4);
+            newTriangle1->mat = make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
+            newTriangle2->mat = make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
+            geometry->add(newTriangle1);
+            geometry->add(newTriangle2);
         }
     }
 }

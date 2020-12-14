@@ -70,6 +70,21 @@ class vec3 {
             return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
         }
 
+        vec3 minCoords(const vec3& other) const {
+            return vec3(
+                        std::min(e[0], other.e[0]),
+                        std::min(e[1], other.e[1]),
+                        std::min(e[2], other.e[2])
+                        );
+        }
+        vec3 maxCoords(const vec3& other) const {
+            return vec3(
+                        std::max(e[0], other.e[0]),
+                        std::max(e[1], other.e[1]),
+                        std::max(e[2], other.e[2])
+                        );
+        }
+
     public:
         double e[3];
 };
