@@ -3,6 +3,7 @@
 
 
 void Renderer::render(int lineFrom, int lineTo, std::function<bool(int,int,double)> progressFunc)  {
+    AtomicCounterGuard renderThreadCounter(nRenderInProgress);
     if(!world) {
         std::cerr << "Renderer::render: No World\n";
         return;
@@ -111,8 +112,7 @@ color Renderer::ray_color(
 }
 
 
-void Renderer::renderMultiThreaded(unsigned char N) {
-    mtRenderInProgress = true; // TODO: RAII
+std::vector<std::thread> Renderer::renderMultiThreaded(unsigned char N, bool async) {
     bRenderCancelled = false;
     std::vector<std::thread> threads;
     int lastLineEnd = -1;
@@ -132,8 +132,11 @@ void Renderer::renderMultiThreaded(unsigned char N) {
         });
     }
 
-    for(std::size_t i = 0;i<threads.size(); ++i) {
-        threads[i].join();
+    if(!async) {
+        for(std::size_t i = 0;i<threads.size(); ++i) {
+            threads[i].join();
+        }
+        return {};
     }
-    mtRenderInProgress = false;
+    return threads;
 }

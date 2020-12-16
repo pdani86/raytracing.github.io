@@ -19,6 +19,16 @@
 #include "material.h"
 #include "sphere.h"
 
+
+class AtomicCounterGuard
+{
+public:
+    AtomicCounterGuard(std::atomic_int& c) : counter(c) {++counter;}
+    ~AtomicCounterGuard() {--counter;}
+private:
+    std::atomic_int& counter;
+};
+
 class Renderer
 {
 public:
@@ -26,7 +36,7 @@ public:
 
     void render(int lineFrom, int lineTo, std::function<bool(int,int,double)> progressFunc);
     void render(int lineFrom = 0, int lineTo = -1) {render(lineFrom, lineTo, [](int, int, double) -> bool {return true;});}
-    void renderMultiThreaded(unsigned char N = 4);
+    std::vector<std::thread> renderMultiThreaded(unsigned char N = 4, bool async = false);
     void requestRenderStop() { bRenderCancelled = true; }
 
     color ray_color(const ray& r, int depth) {return ray_color(r, depth, make_shared<hittable_pdf>(nullptr, point3(0.0, 0.0, 0.0)));}
@@ -34,7 +44,7 @@ public:
 
     std::vector<double>& getImage() {return image;}
 
-    bool isRenderInProgress() const { return mtRenderInProgress; }
+    bool isRenderInProgress() const { return nRenderInProgress > 0; }
 
 private:
 
@@ -53,7 +63,7 @@ public:
 private:
     std::vector<double> image;
     std::mutex imageMutex;
-    std::atomic_bool mtRenderInProgress{false};
+    std::atomic_int nRenderInProgress{0};
     std::atomic_bool bRenderCancelled{false};
 };
 
