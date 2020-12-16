@@ -37,6 +37,7 @@ class ray {
         point3 orig;
         vec3 dir;
         double tm;
+        vec3 forwardLight;
 };
 
 #endif

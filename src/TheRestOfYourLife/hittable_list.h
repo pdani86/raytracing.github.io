@@ -39,7 +39,7 @@ class hittable_list : public hittable  {
 };
 
 
-bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+inline bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
     hit_record temp_rec;
     auto hit_anything = false;
     auto closest_so_far = t_max;
@@ -56,7 +56,7 @@ bool hittable_list::hit(const ray& r, double t_min, double t_max, hit_record& re
 }
 
 
-bool hittable_list::bounding_box(double time0, double time1, aabb& output_box) const {
+inline bool hittable_list::bounding_box(double time0, double time1, aabb& output_box) const {
     if (objects.empty()) return false;
 
     aabb temp_box;
@@ -72,7 +72,7 @@ bool hittable_list::bounding_box(double time0, double time1, aabb& output_box) c
 }
 
 
-double hittable_list::pdf_value(const point3& o, const vec3& v) const {
+inline double hittable_list::pdf_value(const point3& o, const vec3& v) const {
     auto weight = 1.0/objects.size();
     auto sum = 0.0;
 
@@ -83,7 +83,7 @@ double hittable_list::pdf_value(const point3& o, const vec3& v) const {
 }
 
 
-vec3 hittable_list::random(const vec3 &o) const {
+inline vec3 hittable_list::random(const vec3 &o) const {
     auto int_size = static_cast<int>(objects.size());
     return objects[random_int(0, int_size-1)]->random(o);
 }

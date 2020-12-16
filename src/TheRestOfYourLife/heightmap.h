@@ -79,7 +79,7 @@ inline void heightmap::generateGeometry() {
             point3 p3((x + 1 - centerX) * step, map_data[y+1][x+1] * heightScale, (y + 1 - centerY) * step);
             point3 p4((x - centerX) * step, map_data[y+1][x] * heightScale, (y + 1 - centerY) * step);
 
-            auto newTriangle1 = make_shared<triangle>(p1,p2,p3));
+            auto newTriangle1 = make_shared<triangle>(p1,p2,p3);
             auto newTriangle2 = make_shared<triangle>(p1,p3,p4);
             newTriangle1->mat = make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
             newTriangle2->mat = make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);

@@ -15,6 +15,7 @@
 
 #include "pdf.h"
 #include "texture.h"
+#include "hittable.h"
 
 
 struct scatter_record {
@@ -138,19 +139,19 @@ class dielectric : public material {
 
 class diffuse_light : public material {
     public:
-        diffuse_light(shared_ptr<texture> a) : emit(a) {}
-        diffuse_light(color c) : emit(make_shared<solid_color>(c)) {}
+        diffuse_light(shared_ptr<texture> a) : emit_tex(a) {}
+        diffuse_light(color c) : emit_tex(make_shared<solid_color>(c)) {}
 
         virtual color emitted(
             const ray& r_in, const hit_record& rec, double u, double v, const point3& p
         ) const override {
             if (!rec.front_face)
                 return color(0,0,0);
-            return emit->value(u, v, p);
+            return emit_tex->value(u, v, p);
         }
 
     public:
-        shared_ptr<texture> emit;
+        shared_ptr<texture> emit_tex;
 };
 
 

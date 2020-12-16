@@ -53,7 +53,7 @@ class sphere : public hittable {
         }
 };
 
-double sphere::pdf_value(const point3& o, const vec3& v) const {
+inline double sphere::pdf_value(const point3& o, const vec3& v) const {
     hit_record rec;
     if (!this->hit(ray(o, v), 0.001, infinity, rec))
         return 0;
@@ -64,7 +64,7 @@ double sphere::pdf_value(const point3& o, const vec3& v) const {
     return  1 / solid_angle;
 }
 
-vec3 sphere::random(const point3& o) const {
+inline vec3 sphere::random(const point3& o) const {
      vec3 direction = center - o;
      auto distance_squared = direction.length_squared();
      onb uvw;
@@ -73,7 +73,7 @@ vec3 sphere::random(const point3& o) const {
 }
 
 
-bool sphere::bounding_box(double time0, double time1, aabb& output_box) const {
+inline bool sphere::bounding_box(double time0, double time1, aabb& output_box) const {
     output_box = aabb(
         center - vec3(radius, radius, radius),
         center + vec3(radius, radius, radius));
@@ -81,7 +81,7 @@ bool sphere::bounding_box(double time0, double time1, aabb& output_box) const {
 }
 
 
-bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
+inline bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const {
     vec3 oc = r.origin() - center;
     auto a = r.direction().length_squared();
     auto half_b = dot(oc, r.direction());
