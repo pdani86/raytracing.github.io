@@ -13,10 +13,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    int width = 600;
-    int height = 600;
+    int width = 1000;
+    int height = 1000;
 
     ui->graphicsView->setScene(&scene);
+    ui->graphicsView->scale(1.0, -1.0);
 
     //point3 lookFrom(0.0, 0.0, 0.0);
     //point3 lookAt(0.0, 0.0, 1.0);
@@ -60,7 +61,7 @@ void MainWindow::on_startButton_clicked()
         auto renderThreads = renderer->renderMultiThreaded(4, true);
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
         while(renderer->isRenderInProgress()) {
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::milliseconds(400));
             emit signal_updateImage();
         }
         for(auto& curThread : renderThreads) {
