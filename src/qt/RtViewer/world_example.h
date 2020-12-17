@@ -52,8 +52,9 @@ inline hittable_list cornell_box() {
 }
 
 inline shared_ptr<hittable> createHeightMap(const point3 lightPos) {
-    auto heightmap0 = make_shared<heightmap>(50, 50, make_shared<metal>(color(0.95, 0.95, 0.95), 0.0));
+    auto heightmap0 = make_shared<heightmap>(20, 20, make_shared<metal>(color(0.95, 0.95, 0.95), 0.0));
     //heightmap0->material = make_shared<lambertian>(color(1.0, 1.0, 1.0));
+    heightmap0->step *= 2.5;
 
     const auto ySize = heightmap0->map_data.size();
     const auto xSize = heightmap0->map_data.at(0).size();
@@ -64,7 +65,9 @@ inline shared_ptr<hittable> createHeightMap(const point3 lightPos) {
         double dx = (x - centerX);
         double dy = (y - centerY);
 
-        return (dx*dx + dy*dy) * 0.15 + std::cos(2*M_PI*(dx+dy)/40.0) * 15.0;
+        dx *= 2.5;
+        dy *= 2.5;
+        return ((dx*dx + dy*dy) * 0.15 + std::cos(2*M_PI*(dx+dy)/40.0) * 15.0);
     });
     heightmap0->generateGeometry();
     return make_shared<translate>(heightmap0, lightPos + vec3(0.0, -30.0, 0.0));
@@ -83,10 +86,16 @@ inline std::pair<shared_ptr<hittable_list>, shared_ptr<hittable_list>> createExa
     //lights->add(make_shared<sphere>(point3(190, 500, 190), 90, shared_ptr<material>()));
     //lights->add(make_shared<sphere>(point3(0, 10, 190), 90, shared_ptr<material>()));
     //auto dbgMarkerSphere = make_shared<sphere>(vec3(lightPos.x(), lightPos.y()+350, lightPos.z()), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
-    auto triangle0 = make_shared<triangle>(point3(50, 50, 50), point3(150, 50, 50), point3(150, 150, 50));
+    //auto dbgMarkerSphere2 = make_shared<sphere>(vec3(50,50,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
+    //auto dbgMarkerSphere3 = make_shared<sphere>(vec3(150,50,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
+    //auto dbgMarkerSphere4 = make_shared<sphere>(vec3(150,350,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
+    auto triangle0 = make_shared<triangle>(point3(50, 50, 50), point3(150, 50, 50), point3(150, 350, 50));
     triangle0->mat = make_shared<lambertian>(color(1.0, 0.4, 0.3));
 
     auto world = make_shared<hittable_list>(cornell_box());
+    /*world->add(dbgMarkerSphere2);
+    world->add(dbgMarkerSphere3);
+    world->add(dbgMarkerSphere4);*/
     int blockSquareSize = 80;
     int filmSize = 555/2;
 
@@ -111,7 +120,7 @@ inline std::pair<shared_ptr<hittable_list>, shared_ptr<hittable_list>> createExa
 
     //world.add(blockRect);
     world->add(heightmap0);
-    world->add(triangle0);
+    //world->add(triangle0);
 
     std::pair<shared_ptr<hittable_list>, shared_ptr<hittable_list>> result;
     result.first = world;

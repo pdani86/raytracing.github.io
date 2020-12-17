@@ -101,7 +101,8 @@ color Renderer::ray_color(
              * ray_color(srec.specular_ray, depth-1, _lights_pdf);
     }
 
-    mixture_pdf p(_lights_pdf, srec.pdf_ptr);
+    //mixture_pdf p(_lights_pdf, srec.pdf_ptr);
+    pdf& p = *srec.pdf_ptr;
     ray scattered = ray(rec.p, p.generate(), r.time());
     auto pdf_val = p.value(scattered.direction());
 

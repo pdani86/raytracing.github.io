@@ -13,8 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    int width = 1000;
-    int height = 1000;
+    int width = 600;
+    int height = 600;
 
     ui->graphicsView->setScene(&scene);
     ui->graphicsView->scale(1.0, -1.0);
@@ -23,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     //point3 lookAt(0.0, 0.0, 1.0);
     point3 lookUp(0.0, 1.0, 0.0);
 
-    point3 lookFrom(278, 200, -800);
+    point3 lookFrom(278, 200, -700);
     point3 lookAt(555/2, 555/2, 552/2);
 
     double vFovDegree = 50.0;

@@ -27,30 +27,46 @@ public:
 inline bool triangle::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
     vec3 ab = b - a;
-    vec3 ac = c - a;
-    vec3 normal = cross(ab, ac);
+    vec3 bc = c - b;
+    vec3 ca = a - c;
+
+    vec3 normal = cross(ab, ca);
     auto normalLen = normal.length();
     if(normalLen < 0.0001) return false;
+
     normal = normal / normalLen; // TODO: can be precalculated
     double num = dot(normal, a - r.orig);
     double den = dot(normal, r.dir);
     if(fabs(den)<0.0001) return false;
     //if(den > 0) return false; // TODO which side to allow (front face/back face)
+
     double t = num / den;
     if(t<t_min || t>t_max) return false;
+
     point3 hitPoint = r.orig + t * r.dir;
-    double abLen = ab.length();
-    double acLen = ac.length();
     vec3 aToHit = hitPoint - a;
+
+    vec3 nAB = cross(normal, ab);
+    vec3 nBC = cross(normal, bc);
+    vec3 nCA = cross(normal, ca);
+    vec3 cToHit = hitPoint - c;
+    double dAB = dot(nAB, aToHit);
+    double dBC = dot(nBC, cToHit);
+    double dCA = dot(nCA, aToHit);
+    bool sideAB = dAB >= 0;
+    bool sideBC = dBC >= 0;
+    bool sideCA = dCA >= 0;
+    bool isInside = (sideAB == sideBC) && (sideAB == sideCA);
+    if(!isInside) return false;
+
+
+    double abLen = ab.length();
+    double acLen = ca.length();
     vec3 uVec = ab / abLen;
-    vec3 vVec = ac / acLen;
+    vec3 vVec = ca / (acLen*-1);
     double u = dot(aToHit, uVec) / abLen;
     double v = dot(aToHit, vVec) / acLen;
-    if(u < 0) return false;
-    if(v < 0) return false;
-    if(u>1.0) return false;
-    if(v>1.0) return false;
-    if(u+v>1.0) return false;
+
     rec.normal = normal;
     rec.t = t;
     rec.p = hitPoint;
