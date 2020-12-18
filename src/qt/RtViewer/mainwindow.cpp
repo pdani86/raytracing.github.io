@@ -89,7 +89,8 @@ void MainWindow::on_updateImageSignal() {
     {
         auto renderResult = renderer->getImage();
         auto imageLock = renderer->lockImage();
-        bitmapData = BMP::mapToBytePerChannelNormalize(renderResult);
+        //bitmapData = BMP::mapToBytePerChannelNormalize(renderResult);
+        bitmapData = BMP::mapToBytePerChannel(renderResult, 2550.0);
     }
 
     scene.clear();

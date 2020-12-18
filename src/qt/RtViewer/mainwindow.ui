@@ -72,6 +72,9 @@
              <property name="maximum">
               <double>1000000000.000000000000000</double>
              </property>
+             <property name="value">
+              <double>150.000000000000000</double>
+             </property>
             </widget>
            </item>
            <item row="0" column="0">
@@ -93,7 +96,7 @@
               <double>1000000000.000000000000000</double>
              </property>
              <property name="value">
-              <double>-100.000000000000000</double>
+              <double>-400.000000000000000</double>
              </property>
             </widget>
            </item>

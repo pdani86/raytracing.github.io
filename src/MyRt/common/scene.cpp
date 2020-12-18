@@ -23,7 +23,8 @@ color Scene::ray_color(const ray& r, int depth) {
         if(world->hit(toLight, 0.001, dist - 0.001, light_hit)) continue;
         double cosLight = dot(rec.normal, dir);
         cosLight /= dist;
-        if(cosLight < 0) continue;
+        //if(cosLight < 0) continue;
+        if(cosLight < 0) cosLight *= -1.0;
         directLightSum += cosLight * curLight->getColor(dir);
     }
 
