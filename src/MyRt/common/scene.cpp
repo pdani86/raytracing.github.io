@@ -1,5 +1,7 @@
 #include "scene.h"
 
+#include <cmath>
+
 namespace myrt
 {
 
@@ -22,7 +24,7 @@ color Scene::ray_color(const ray& r, int depth) {
         pMaterial = &materials[rec.materialId];
     }
 
-    color directLightSum;
+    color diffuseAndSpecularSum;
     for(auto& curLight : lights) {
         vec3 dir = curLight->pos - rec.p;
         double dist = dir.length();
@@ -38,24 +40,37 @@ color Scene::ray_color(const ray& r, int depth) {
         if(pMaterial)
             diffuseColor = pMaterial->diffuse;
 
-        directLightSum += cosLight * curLight->getColor(dir) * diffuseColor;
+        diffuseAndSpecularSum += cosLight * curLight->getColor(dir) * diffuseColor;
+
+
+        /*if(pMaterial && pMaterial->isSpecular) { // TODO
+            double reflDirLen = reflectDir.length();
+            if(reflDirLen > EPSILON) {
+                double cosReflOut = std::fabs(dot(r.dir, reflectDir / reflDirLen));
+                color specularColor = pMaterial->specular * std::pow(cosReflOut, pMaterial->specK) / cosLight;
+                directLightSum += specularColor;
+            }
+        }*/
+
     }
 
 
     color reflected;
-    color emitted;
-    color ambient;
-    color diffuse;
-    //color refracted;
-    color specular;
+    //color emitted;
+    //color ambient;
 
-    ray reflectRay(rec.p, reflectDir);
     if(pMaterial) {
+        ray reflectRay(rec.p, reflectDir);
         color reflectInColor = ray_color(reflectRay, depth - 1);
         reflected = pMaterial->reflective * reflectInColor;
+
+        if(pMaterial->isRefractive) {
+            // TODO
+            //vec3 refractDir = refract()
+        }
     }
 
-    return emitted + directLightSum + reflected;
+    return /*emitted + */diffuseAndSpecularSum + reflected;
 }
 
 }

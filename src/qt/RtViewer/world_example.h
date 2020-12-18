@@ -7,6 +7,8 @@
 #include "heightmap.h"
 #include "light.h"
 #include "scene.h"
+#include "sphere.h"
+#include "triangle_smooth.h"
 //#include "film.h"
 
 #include <iostream>
@@ -30,6 +32,7 @@ using myrt::Light;
 using myrt::color;
 using myrt::Material;
 using myrt::Scene;
+using myrt::Sphere;
 
 inline void _add_quad(hittable_list& list, const std::array<point3, 4>& points, unsigned int matId = 0, bool reverse = false) {
     // TODO: reverse CW, CCW
@@ -102,10 +105,13 @@ inline std::vector<Material> getExampleMaterials() {
     Material greenSide;
     Material redSide;
     Material reflective;
+    Material specular0;
+    Material specular1;
+    Material matte0;
 
     whiteSide.diffuse = color(1.0, 1.0, 1.0);
     whiteSide.specular = color(1.0, 1.0, 1.0);
-    whiteSide.reflective = color(0.2, 0.2, 0.2);
+    whiteSide.reflective = color(0.15, 0.15, 0.15);
 
     greenSide.diffuse = color(0.3, 0.95, 0.05);
     greenSide.specular = color(0.3, 0.95, 0.05);
@@ -117,10 +123,19 @@ inline std::vector<Material> getExampleMaterials() {
     reflective.specular = color(0.05, 0.05, 0.05);
     reflective.reflective = color(0.9, 0.95, 0.75);
 
+    specular0 = redSide;
+    specular1 = redSide;
+    specular1.specK = 15.0;
+    matte0 = redSide;
+    matte0.isSpecular = false;
+
     result.emplace_back(whiteSide);
     result.emplace_back(greenSide);
     result.emplace_back(redSide);
     result.emplace_back(reflective);
+    result.emplace_back(specular0);
+    result.emplace_back(specular1);
+    result.emplace_back(matte0);
 
     return result;
 }
@@ -132,6 +147,22 @@ inline Scene createExampleWorld() {
     world->add(std::make_shared<hittable_list>(my_box()));
     int blockSquareSize = 80;
     int filmSize = 555/2;
+
+    auto sphere0 = std::make_shared<Sphere>(point3(-40.0, 30.0, -50.0), 10.0);
+    sphere0->materialId = 0;
+    auto sphere1 = std::make_shared<Sphere>(point3(40.0, 30.0, -50.0), 10.0);
+    sphere1->materialId = 0;
+    auto sphere2 = std::make_shared<Sphere>(point3(-61.0, 30.0, -50.0), 10.0);
+    sphere2->materialId = 4;
+    auto sphere3 = std::make_shared<Sphere>(point3(-82.0, 30.0, -50.0), 10.0);
+    sphere3->materialId = 5;
+    auto sphere4 = std::make_shared<Sphere>(point3(61.0, 30.0, -50.0), 10.0);
+    sphere4->materialId = 6;
+    world->add(sphere0);
+    world->add(sphere1);
+    world->add(sphere2);
+    world->add(sphere3);
+    world->add(sphere4);
 
     auto heightmap0 = createHeightMap(lightPos);
 /*

@@ -13,6 +13,11 @@ struct Material
     color reflective;
     double specK = 1.0;
     color emissive;
+    color refractive;
+
+    bool isEmissive = false;
+    bool isSpecular = true;
+    bool refracts = false;
 };
 
 }

@@ -7,6 +7,7 @@
 #include "hittable_list.h"
 
 #include "triangle.h"
+#include "triangle_smooth.h"
 #include "material.h"
 
 #include <memory>
@@ -76,6 +77,8 @@ inline void Heightmap::generateGeometry(vec3 translate) {
 
             auto newTriangle1 = std::make_shared<Triangle>(p1,p2,p3);
             auto newTriangle2 = std::make_shared<Triangle>(p1,p3,p4);
+            //auto newTriangle1 = std::make_shared<TriangleSmooth>(p1,p2,p3);
+            //auto newTriangle2 = std::make_shared<TriangleSmooth>(p1,p3,p4);
             newTriangle1->materialId = materialId;
             newTriangle2->materialId = materialId;
             geometry->add(newTriangle1);
