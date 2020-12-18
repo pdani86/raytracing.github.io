@@ -26,6 +26,8 @@ using myrt::hittable;
 using myrt::hittable_list;
 using myrt::hit_record;
 using myrt::infinity;
+using myrt::dot;
+using myrt::cross;
 
 class AtomicCounterGuard
 {
@@ -65,7 +67,7 @@ public:
     color background;
     std::shared_ptr<hittable> world;
     int max_depth = 20;
-    std::shared_ptr<hittable_list> lights;
+    std::vector<point3> lights;
 
     std::unique_lock<std::mutex> lockImage() { return std::unique_lock<std::mutex>(imageMutex); }
 private:

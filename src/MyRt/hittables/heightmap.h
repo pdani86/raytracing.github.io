@@ -32,7 +32,7 @@ public:
         generateGeometry();
     }
 
-    void generateGeometry();
+    void generateGeometry(vec3 translate = vec3());
     void generateData(std::function<double(double,double)> func);
     void generateParabolaData();
 
@@ -53,7 +53,7 @@ public:
     double heightScale = 1.0;
 };
 
-inline void heightmap::generateGeometry() {
+inline void heightmap::generateGeometry(vec3 translate) {
     geometry->clear();
     if(map_data.size()==0) return;
     if(map_data.at(0).size() == 0) return;
@@ -65,20 +65,14 @@ inline void heightmap::generateGeometry() {
 
     for(std::size_t y = 0; y < ySize-1; ++y) {
         for(std::size_t x = 0; x < xSize-1; ++x) {
-            /*geometry->add(make_shared<sphere>(
-                              point3(
-                                (x - centerX) * step,
-                                  map_data[y][x] * heightScale,
-                                (y - centerY) * step
-                                  ),
-                              step * 1.5,
-                              material
-                              ));*/
-
             point3 p1((x - centerX) * step, map_data[y][x] * heightScale, (y - centerY) * step);
             point3 p2((x + 1 - centerX) * step, map_data[y][x+1] * heightScale, (y - centerY) * step);
             point3 p3((x + 1 - centerX) * step, map_data[y+1][x+1] * heightScale, (y + 1 - centerY) * step);
             point3 p4((x - centerX) * step, map_data[y+1][x] * heightScale, (y + 1 - centerY) * step);
+            p1 += translate;
+            p2 += translate;
+            p3 += translate;
+            p4 += translate;
 
             auto newTriangle1 = std::make_shared<triangle>(p1,p2,p3);
             auto newTriangle2 = std::make_shared<triangle>(p1,p3,p4);

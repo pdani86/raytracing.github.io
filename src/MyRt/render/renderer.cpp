@@ -8,7 +8,7 @@ void Renderer::render(int lineFrom, int lineTo, std::function<bool(int,int,doubl
         std::cerr << "Renderer::render: No World\n";
         return;
     }
-    if(!lights) {
+    if(lights.empty()) {
         std::cerr << "Renderer::render: No Lights\n";
         return;
     }
@@ -65,8 +65,16 @@ color Renderer::ray_color(const ray& r, int depth) {
         return background;
 
     color directLightSum;
-    for(auto& curLight : lights->objects) {
-        //directLightSum += ;
+    for(auto& curLight : lights) {
+        vec3 dir = curLight - rec.p;
+        double dist = dir.length();
+        ray toLight(rec.p, dir/dist);
+        hit_record light_hit;
+        if(world->hit(toLight, 0.001, dist - 0.001, light_hit)) continue;
+        double cosLight = dot(rec.normal, dir);
+        cosLight /= dist;
+        if(cosLight < 0) continue;
+        directLightSum += cosLight * color(1.0, 1.0, 1.0);
     }
 
     color emitted;

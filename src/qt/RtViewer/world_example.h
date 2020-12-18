@@ -42,30 +42,21 @@ inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
         dy *= 2.5;
         return ((dx*dx + dy*dy) * 0.15 + std::cos(2*M_PI*(dx+dy)/40.0) * 15.0);
     });
-    heightmap0->generateGeometry();
+    heightmap0->generateGeometry(lightPos + vec3(0.0, -30.0, 0.0));
     //return make_shared<translate>(heightmap0, lightPos + vec3(0.0, -30.0, 0.0));
     return heightmap0;
 }
 
-inline std::pair<shared_ptr<hittable_list>, shared_ptr<hittable_list>> createExampleWorld() {
+inline std::pair<shared_ptr<hittable_list>, std::vector<point3>> createExampleWorld() {
     // World
-
     const point3 lightPos(555/2, 50, 555/2);
-
     auto lights = std::make_shared<hittable_list>();
-    //lights->add(make_shared<xz_rect>(213, 343, 227, 332, 554, shared_ptr<material>()));
-    //lights->add(make_shared<sphere>(lightPos, 1, shared_ptr<material>()));
-    //lights->add(make_shared<sphere>(lightPos + vec3(0.0, 600.0, 0.0), 1, shared_ptr<material>()));
-    //lights->add(make_shared<sphere>(vec3(200.0, 100.0, -50.0), 1, shared_ptr<material>()));
-    //lights->add(make_shared<sphere>(point3(190, 500, 190), 90, shared_ptr<material>()));
-    //lights->add(make_shared<sphere>(point3(0, 10, 190), 90, shared_ptr<material>()));
     //auto dbgMarkerSphere = make_shared<sphere>(vec3(lightPos.x(), lightPos.y()+350, lightPos.z()), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
     //auto dbgMarkerSphere2 = make_shared<sphere>(vec3(50,50,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
     //auto dbgMarkerSphere3 = make_shared<sphere>(vec3(150,50,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
     //auto dbgMarkerSphere4 = make_shared<sphere>(vec3(150,350,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
     auto triangle0 = std::make_shared<triangle>(point3(50, 50, 50), point3(150, 50, 50), point3(150, 350, 50));
     //triangle0->mat = std::make_shared<lambertian>(color(1.0, 0.4, 0.3));
-
     auto world = std::make_shared<hittable_list>(/*cornell_box()*/);
     /*world->add(dbgMarkerSphere2);
     world->add(dbgMarkerSphere3);
@@ -96,9 +87,10 @@ inline std::pair<shared_ptr<hittable_list>, shared_ptr<hittable_list>> createExa
     world->add(heightmap0);
     //world->add(triangle0);
 
-    std::pair<std::shared_ptr<hittable_list>, std::shared_ptr<hittable_list>> result;
+    std::pair<std::shared_ptr<hittable_list>, std::vector<point3>> result;
     result.first = world;
-    result.second = lights;
+    result.second = std::vector<point3>();
+    result.second.push_back(lightPos);
     return result;
 }
 
