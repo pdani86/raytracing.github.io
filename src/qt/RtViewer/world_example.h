@@ -124,8 +124,11 @@ inline std::vector<Material> getExampleMaterials() {
     reflective.reflective = color(0.9, 0.95, 0.75);
 
     specular0 = redSide;
+    specular0.isSpecular = true;
+    specular0.specK = 2.0;
     specular1 = redSide;
-    specular1.specK = 15.0;
+    specular1.isSpecular = true;
+    specular1.specK = 32.0;
     matte0 = redSide;
     matte0.isSpecular = false;
 

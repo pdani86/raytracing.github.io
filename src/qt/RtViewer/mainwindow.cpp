@@ -4,6 +4,8 @@
 #include <algorithm>
 
 #include <QThread>
+#include <QDateTime>
+#include <QMessageBox>
 
 #include "vec3.h"
 #include "camera.h"
@@ -21,7 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     int height = 600;
 
     ui->graphicsView->setScene(&scene);
-    ui->graphicsView->scale(1.0, -1.0);
+    //ui->graphicsView->scale(1.0, -1.0);
 
     //point3 lookFrom(0.0, 0.0, 0.0);
     //point3 lookAt(0.0, 0.0, 1.0);
@@ -60,6 +62,8 @@ MainWindow::~MainWindow()
 void MainWindow::on_startButton_clicked()
 {
     setCamFromUi();
+    renderer->image_width = ui->resX->value();
+    renderer->image_height = ui->resY->value();
 
     if(renderThread.joinable())
         renderThread.join();
@@ -107,7 +111,7 @@ void MainWindow::setCamFromUi() {
     vec3 lookAt(ui->lookX->value(), ui->lookY->value(), ui->lookZ->value());
     vec3 lookUp(0.0, 1.0, 0.0);
     double vFov = ui->vFov->value();
-    double aspect = 1.0;
+    double aspect = ui->resX->value() / (double) ui->resY->value();
     double focusDist = 10.0;
 
     renderer->max_depth = ui->maxRayBounce->value();
@@ -122,20 +126,23 @@ void MainWindow::setCamFromUi() {
                 );
 }
 
-void MainWindow::updateGraphicsScene() {
+QImage MainWindow::getCurrentImage() {
     std::vector<unsigned char> bitmapData;
     //bitmapData = BMP::mapToBytePerChannelNormalize(renderResult);
     int brightnessVal = ui->brightnessSlider->value() - ui->brightnessSlider->maximum() / 2;
-
     double brightnessScale = 1000 * std::pow(2.0, brightnessVal/(double)20.0);
-
     bitmapData = BMP::mapToBytePerChannel(lastImage, brightnessScale);
-
-    scene.clear();
     QImage image(renderer->image_width, renderer->image_height, QImage::Format_RGB888);
     //std::cerr << "image size: " << std::to_string(image.sizeInBytes()) << "\n";
     std::size_t imageSize = 3 * renderer->image_width * renderer->image_height;
     memcpy(image.bits(), bitmapData.data(), std::min(imageSize, bitmapData.size()));
+    return image;
+}
+
+void MainWindow::updateGraphicsScene() {
+    scene.clear();
+    std::vector<unsigned char> bitmapData;
+    QImage image = getCurrentImage();
     QPixmap pm = QPixmap::fromImage(image);
     scene.addPixmap(pm);
 }
@@ -143,4 +150,25 @@ void MainWindow::updateGraphicsScene() {
 void MainWindow::on_brightnessSlider_valueChanged(int value)
 {
     updateGraphicsScene();
+}
+
+void MainWindow::on_saveImageBtn_clicked()
+{
+    //if(renderer->isRenderInProgress()) return;
+    QImage curImage = getCurrentImage();
+    auto now = QDateTime::currentDateTime();
+    QString dateStr = QString("%1%2%3_%4%5%6")
+            .arg(now.date().year())
+            .arg(now.date().month(), 2, 10, QChar('0'))
+            .arg(now.date().day(), 2, 10, QChar('0'))
+            .arg(now.time().hour(), 2, 10, QChar('0'))
+            .arg(now.time().minute(), 2, 10, QChar('0'))
+            .arg(now.time().second(), 2, 10, QChar('0'))
+            ;
+    QString filename = QString("image_%1.png").arg(dateStr);
+    if(curImage.save(filename, "PNG")) {
+        QMessageBox::information(this, "Image Saved", QString("Image Saved As %1").arg(filename));
+    } else {
+        QMessageBox::critical(this, "Couldn't Save Image", QString("Couldn't Save Image As %1").arg(filename));
+    }
 }

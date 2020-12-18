@@ -8,7 +8,6 @@ namespace myrt
 color Scene::ray_color(const ray& r, int depth) {
     constexpr double EPSILON = 0.001;
     hit_record rec;
-    //const color oneColor{1.0, 1.0, 1.0};
 
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if (depth <= 0)
@@ -26,29 +25,31 @@ color Scene::ray_color(const ray& r, int depth) {
 
     color diffuseAndSpecularSum;
     for(auto& curLight : lights) {
-        vec3 dir = curLight->pos - rec.p;
-        double dist = dir.length();
-        ray toLight(rec.p, dir/dist);
+        vec3 toLightDir = curLight->pos - rec.p;
+        double toLightDist = toLightDir.length();
+        vec3 toLightDirUnit = toLightDir / toLightDist;
+        ray toLight(rec.p, toLightDirUnit);
         hit_record light_hit;
-        if(world->hit(toLight, EPSILON, dist - EPSILON, light_hit)) continue;
-        double cosLight = dot(rec.normal, dir);
-        cosLight /= dist;
+        if(world->hit(toLight, EPSILON, toLightDist - EPSILON, light_hit)) continue;
+        double cosLight = dot(rec.normal, toLightDirUnit);
         //if(cosLight < 0) continue;
         if(cosLight < 0) cosLight *= -1.0;
 
-        color diffuseColor;// = oneColor;
+        color diffuseColor;
         if(pMaterial)
             diffuseColor = pMaterial->diffuse;
 
-        diffuseAndSpecularSum += cosLight * curLight->getColor(dir) * diffuseColor;
+        color lightColor = curLight->getColor(toLightDir);
+        diffuseAndSpecularSum += cosLight * lightColor * diffuseColor;
 
-
-        /*if(pMaterial && pMaterial->isSpecular) { // TODO
-            double reflDirLen = reflectDir.length();
-            if(reflDirLen > EPSILON) {
-                double cosReflOut = std::fabs(dot(r.dir, reflectDir / reflDirLen));
-                color specularColor = pMaterial->specular * std::pow(cosReflOut, pMaterial->specK) / cosLight;
-                directLightSum += specularColor;
+        /* // TODO: too bright
+        if(pMaterial && pMaterial->isSpecular) {
+            if(cosLight > EPSILON) {
+                double cosReflOut = dot(toLightDirUnit, reflectDir);
+                if(cosReflOut > 0.0) {
+                    color specularColor = pMaterial->specular * lightColor * (std::pow(cosReflOut, pMaterial->specK));
+                    diffuseAndSpecularSum += specularColor;
+                }
             }
         }*/
 

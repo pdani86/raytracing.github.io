@@ -27,6 +27,8 @@ public:
 
     void updateGraphicsScene();
 
+    QImage getCurrentImage();
+
 signals:
     void renderCompletion();
     void signal_updateImage();
@@ -40,6 +42,8 @@ private slots:
     void on_updateImageSignal();
 
     void on_brightnessSlider_valueChanged(int value);
+
+    void on_saveImageBtn_clicked();
 
 private:
     Ui::MainWindow *ui;

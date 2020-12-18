@@ -16,7 +16,7 @@ struct Material
     color refractive;
 
     bool isEmissive = false;
-    bool isSpecular = true;
+    bool isSpecular = false;
     bool isRefractive = false;
 };
 
