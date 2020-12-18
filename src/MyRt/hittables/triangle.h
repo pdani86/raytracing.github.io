@@ -20,7 +20,7 @@ public:
     point3 b;
     point3 c;
 
-    //std::shared_ptr<material> mat;
+    unsigned int materialId = 0;
 };
 
 inline bool Triangle::hit(
@@ -73,6 +73,7 @@ inline bool Triangle::hit(
     rec.v = v;
     //rec.mat_ptr = mat;
     rec.front_face = true;
+    rec.materialId = materialId;
     return true;
 }
 

@@ -6,6 +6,7 @@ namespace myrt
 color Scene::ray_color(const ray& r, int depth) {
     constexpr double EPSILON = 0.001;
     hit_record rec;
+    //const color oneColor{1.0, 1.0, 1.0};
 
     // If we've exceeded the ray bounce limit, no more light is gathered.
     if (depth <= 0)
@@ -14,6 +15,8 @@ color Scene::ray_color(const ray& r, int depth) {
     // If the ray hits nothing, return the background color.
     if (!world->hit(r, EPSILON, infinity, rec))
         return background;
+
+    auto reflectDir = reflect(r.dir, rec.normal);
 
     color directLightSum;
     for(auto& curLight : lights) {
@@ -26,10 +29,16 @@ color Scene::ray_color(const ray& r, int depth) {
         cosLight /= dist;
         //if(cosLight < 0) continue;
         if(cosLight < 0) cosLight *= -1.0;
-        directLightSum += cosLight * curLight->getColor(dir);
+
+        color diffuseColor;// = oneColor;
+        if(rec.materialId >= 0 && rec.materialId <= materials.size()-1) {
+            diffuseColor = materials[rec.materialId].diffuse;
+        }
+
+        directLightSum += cosLight * curLight->getColor(dir) * diffuseColor;
     }
 
-    auto reflectDir = reflect(r.dir, rec.normal);
+
     ray reflectRay(rec.p, reflectDir);
     //color reflectInColor = ray_color(reflectRay, depth - 1);
 

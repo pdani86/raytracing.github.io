@@ -6,6 +6,7 @@
 #include "material.h"
 #include "heightmap.h"
 #include "light.h"
+#include "scene.h"
 //#include "film.h"
 
 #include <iostream>
@@ -26,11 +27,16 @@ using myrt::hittable;
 using myrt::hittable_list;
 using myrt::point3;
 using myrt::Light;
+using myrt::color;
+using myrt::Material;
+using myrt::Scene;
 
-inline void _add_quad(hittable_list& list, const std::array<point3, 4>& points, bool reverse = false) {
+inline void _add_quad(hittable_list& list, const std::array<point3, 4>& points, unsigned int matId = 0, bool reverse = false) {
     // TODO: reverse CW, CCW
     auto t1 = std::make_shared<Triangle>(points[0], points[1], points[2]);
     auto t2 = std::make_shared<Triangle>(points[0], points[2], points[3]);
+    t1->materialId = matId;
+    t2->materialId = matId;
     list.add(t1);
     list.add(t2);
 }
@@ -38,6 +44,7 @@ inline void _add_quad(hittable_list& list, const std::array<point3, 4>& points, 
 
 inline hittable_list my_box() {
     hittable_list list;
+
     constexpr double size = 200.0;
     constexpr double halfSize = size/2.0;
     // points: bottom-top | front-rear | left-right
@@ -50,12 +57,11 @@ inline hittable_list my_box() {
     point3 trl(-halfSize, size, halfSize);
     point3 trr(halfSize, size, halfSize);
     point3 tfr(halfSize, size, -halfSize);
-    _add_quad(list, {bfl, brl, brr, bfr});
-    _add_quad(list, {tfl, trl, trr, tfr}, true);
-    _add_quad(list, {bfl, tfl, trl, brl});
-    _add_quad(list, {bfr, tfr, trr, brr}, true);
-
-    _add_quad(list, {brl, trl, trr, brr}, true);
+    _add_quad(list, {bfl, brl, brr, bfr}, 0); // bottom
+    _add_quad(list, {tfl, trl, trr, tfr}, 0, true); // top
+    _add_quad(list, {bfl, tfl, trl, brl}, 1); // left
+    _add_quad(list, {bfr, tfr, trr, brr}, 2, true); // right
+    _add_quad(list, {brl, trl, trr, brr}, 0, true); // back/rear
 
     return list;
 }
@@ -88,7 +94,30 @@ inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
     return heightmap0;
 }
 
-inline std::pair<shared_ptr<hittable_list>, std::vector<std::shared_ptr<Light>>> createExampleWorld() {
+
+inline std::vector<Material> getExampleMaterials() {
+    std::vector<Material> result;
+    Material whiteSide;
+    Material greenSide;
+    Material redSide;
+
+    whiteSide.diffuse = color(1.0, 1.0, 1.0);
+    whiteSide.specular = color(1.0, 1.0, 1.0);
+
+    greenSide.diffuse = color(0.3, 0.95, 0.05);
+    greenSide.specular = color(0.3, 0.95, 0.05);
+
+    redSide.diffuse = color(0.95, 0.3, 0.05);
+    redSide.specular = color(0.95, 0.3, 0.05);
+
+    result.emplace_back(whiteSide);
+    result.emplace_back(greenSide);
+    result.emplace_back(redSide);
+
+    return result;
+}
+
+inline Scene createExampleWorld() {
     // World
     const point3 lightPos(0.0, 40.0, 0.0);
     auto world = std::make_shared<hittable_list>(/*cornell_box()*/);
@@ -116,19 +145,23 @@ inline std::pair<shared_ptr<hittable_list>, std::vector<std::shared_ptr<Light>>>
     //world.add(blockRect);*/
     world->add(heightmap0);
 
-    std::pair<std::shared_ptr<hittable_list>, std::vector<std::shared_ptr<Light>>> result;
-    result.first = world;
-    result.second = std::vector<std::shared_ptr<Light>>();
-    auto light = std::make_shared<Light>(lightPos);
+    std::vector<std::shared_ptr<Light>> lights = std::vector<std::shared_ptr<Light>>();
+    //auto light = std::make_shared<Light>(lightPos);
     auto light2 = std::make_shared<Light>(point3(0.0, 165.0, 0.0));
-    auto light3 = std::make_shared<Light>(point3(70.0, 195.5, -30.0));
+    //auto light3 = std::make_shared<Light>(point3(70.0, 195.5, -30.0));
 
     light2->attenuation[2] = 0.001;
 
     //result.second.emplace_back(light);
-    result.second.emplace_back(light2);
+    lights.emplace_back(light2);
     //result.second.emplace_back(light3);
-    return result;
+
+    Scene resultScene;
+    resultScene.world = world;
+    resultScene.lights = lights;
+    resultScene.materials = getExampleMaterials();
+
+    return resultScene;
 }
 
 

@@ -40,14 +40,13 @@ MainWindow::MainWindow(QWidget *parent)
                 vFovDegree, aspect,
                 aperture, focus_dist
                 );
-    auto world_and_lights = createExampleWorld();
+    auto exampleScene = createExampleWorld();
     renderer = std::make_shared<Renderer>(width, height, cam);
     renderer->scene = std::make_shared<Scene>();
     renderer->scene->background = color(0.0, 0.0, 0.0);
     renderer->max_depth = 1; // ray bounce limit
     renderer->samples_per_pixel = 1;
-    renderer->scene->world = world_and_lights.first;
-    renderer->scene->lights = world_and_lights.second;
+    renderer->scene = std::make_shared<Scene>(exampleScene);
 
     connect(this, SIGNAL(renderCompletion()), this, SLOT(on_renderComplete()), Qt::QueuedConnection);
     connect(this, SIGNAL(signal_updateImage()), this, SLOT(on_updateImageSignal()), Qt::QueuedConnection);
