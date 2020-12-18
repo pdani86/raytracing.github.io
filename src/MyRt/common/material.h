@@ -17,7 +17,7 @@ struct Material
 
     bool isEmissive = false;
     bool isSpecular = true;
-    bool refracts = false;
+    bool isRefractive = false;
 };
 
 }
