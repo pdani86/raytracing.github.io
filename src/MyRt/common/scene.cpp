@@ -17,6 +17,10 @@ color Scene::ray_color(const ray& r, int depth) {
         return background;
 
     auto reflectDir = reflect(r.dir, rec.normal);
+    Material* pMaterial = nullptr;
+    if(rec.materialId >= 0 && rec.materialId <= materials.size()-1) {
+        pMaterial = &materials[rec.materialId];
+    }
 
     color directLightSum;
     for(auto& curLight : lights) {
@@ -31,25 +35,27 @@ color Scene::ray_color(const ray& r, int depth) {
         if(cosLight < 0) cosLight *= -1.0;
 
         color diffuseColor;// = oneColor;
-        if(rec.materialId >= 0 && rec.materialId <= materials.size()-1) {
-            diffuseColor = materials[rec.materialId].diffuse;
-        }
+        if(pMaterial)
+            diffuseColor = pMaterial->diffuse;
 
         directLightSum += cosLight * curLight->getColor(dir) * diffuseColor;
     }
 
 
-    ray reflectRay(rec.p, reflectDir);
-    //color reflectInColor = ray_color(reflectRay, depth - 1);
-
+    color reflected;
     color emitted;
     color ambient;
     color diffuse;
-    color reflected;
     //color refracted;
     color specular;
 
-    return emitted + directLightSum;
+    ray reflectRay(rec.p, reflectDir);
+    if(pMaterial) {
+        color reflectInColor = ray_color(reflectRay, depth - 1);
+        reflected = pMaterial->reflective * reflectInColor;
+    }
+
+    return emitted + directLightSum + reflected;
 }
 
 }

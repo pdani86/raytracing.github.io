@@ -10,6 +10,7 @@ struct Material
     color ambient;
     color diffuse;
     color specular;
+    color reflective;
     double specK = 1.0;
     color emissive;
 };

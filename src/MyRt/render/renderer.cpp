@@ -44,9 +44,9 @@ void Renderer::render(int lineFrom, int lineTo, std::function<bool(int,int,doubl
                 pixel_color += scene->ray_color(r, max_depth);
             }
             auto pixel_ix = image_width * 3 * j + 3 * i;
-            image[pixel_ix+2] = pixel_color.x();
+            image[pixel_ix+0] = pixel_color.x();
             image[pixel_ix+1] = pixel_color.y();
-            image[pixel_ix+0] = pixel_color.z();
+            image[pixel_ix+2] = pixel_color.z();
         }
         int linesReady = abs(j - lineTo) + 1;
         int linesAll = abs(lineTo-lineFrom) + 1;

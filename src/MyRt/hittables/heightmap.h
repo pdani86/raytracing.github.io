@@ -50,6 +50,7 @@ public:
 
     double step = 1.0;
     double heightScale = 1.0;
+    unsigned int materialId = 0;
 };
 
 inline void Heightmap::generateGeometry(vec3 translate) {
@@ -75,8 +76,8 @@ inline void Heightmap::generateGeometry(vec3 translate) {
 
             auto newTriangle1 = std::make_shared<Triangle>(p1,p2,p3);
             auto newTriangle2 = std::make_shared<Triangle>(p1,p3,p4);
-            //newTriangle1->mat = std::make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
-            //newTriangle2->mat = std::make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
+            newTriangle1->materialId = materialId;
+            newTriangle2->materialId = materialId;
             geometry->add(newTriangle1);
             geometry->add(newTriangle2);
         }
@@ -112,7 +113,9 @@ inline void Heightmap::generateParabolaData() {
 
 inline bool Heightmap::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
-    return geometry->hit(r, t_min, t_max, rec);
+    bool didHit = geometry->hit(r, t_min, t_max, rec);
+    rec.materialId = materialId;
+    return didHit;
 }
 
 inline bool Heightmap::bounding_box(double time0, double time1, aabb& output_box) const {

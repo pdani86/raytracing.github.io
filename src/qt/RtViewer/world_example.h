@@ -69,6 +69,7 @@ inline hittable_list my_box() {
 inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
     auto heightmap0 = std::make_shared<Heightmap>(20, 20);
     heightmap0->step = 2.0;
+    heightmap0->materialId = 3;
 
     const auto ySize = heightmap0->map_data.size();
     const auto xSize = heightmap0->map_data.at(0).size();
@@ -100,9 +101,11 @@ inline std::vector<Material> getExampleMaterials() {
     Material whiteSide;
     Material greenSide;
     Material redSide;
+    Material reflective;
 
     whiteSide.diffuse = color(1.0, 1.0, 1.0);
     whiteSide.specular = color(1.0, 1.0, 1.0);
+    whiteSide.reflective = color(0.2, 0.2, 0.2);
 
     greenSide.diffuse = color(0.3, 0.95, 0.05);
     greenSide.specular = color(0.3, 0.95, 0.05);
@@ -110,9 +113,14 @@ inline std::vector<Material> getExampleMaterials() {
     redSide.diffuse = color(0.95, 0.3, 0.05);
     redSide.specular = color(0.95, 0.3, 0.05);
 
+    reflective.diffuse = color(0.01, 0.01, 0.01);
+    reflective.specular = color(0.05, 0.05, 0.05);
+    reflective.reflective = color(0.9, 0.95, 0.75);
+
     result.emplace_back(whiteSide);
     result.emplace_back(greenSide);
     result.emplace_back(redSide);
+    result.emplace_back(reflective);
 
     return result;
 }
