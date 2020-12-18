@@ -25,6 +25,8 @@ public:
     void updateCamUi();
     void setCamFromUi();
 
+    void updateGraphicsScene();
+
 signals:
     void renderCompletion();
     void signal_updateImage();
@@ -37,6 +39,8 @@ private slots:
     void on_renderComplete();
     void on_updateImageSignal();
 
+    void on_brightnessSlider_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
 
@@ -44,5 +48,6 @@ private:
     std::thread renderThread;
 
     QGraphicsScene scene;
+    std::vector<double> lastImage;
 };
 #endif // MAINWINDOW_H

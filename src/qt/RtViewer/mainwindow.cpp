@@ -85,21 +85,13 @@ void MainWindow::on_renderComplete() {
 }
 
 void MainWindow::on_updateImageSignal() {
-    std::vector<unsigned char> bitmapData;
     {
-        auto renderResult = renderer->getImage();
+        auto& renderResult = renderer->getImage();
         auto imageLock = renderer->lockImage();
-        //bitmapData = BMP::mapToBytePerChannelNormalize(renderResult);
-        bitmapData = BMP::mapToBytePerChannel(renderResult, 2550.0);
-    }
+        lastImage = renderResult;
 
-    scene.clear();
-    QImage image(renderer->image_width, renderer->image_height, QImage::Format_RGB888);
-    //std::cerr << "image size: " << std::to_string(image.sizeInBytes()) << "\n";
-    std::size_t imageSize = 3 * renderer->image_width * renderer->image_height;
-    memcpy(image.bits(), bitmapData.data(), std::min(imageSize, bitmapData.size()));
-    QPixmap pm = QPixmap::fromImage(image);
-    scene.addPixmap(pm);
+    }
+    updateGraphicsScene();
 }
 
 void MainWindow::on_stopButton_clicked()
@@ -129,4 +121,27 @@ void MainWindow::setCamFromUi() {
                 aspect,
                 focusDist
                 );
+}
+
+void MainWindow::updateGraphicsScene() {
+    std::vector<unsigned char> bitmapData;
+    //bitmapData = BMP::mapToBytePerChannelNormalize(renderResult);
+    int brightnessVal = ui->brightnessSlider->value() - ui->brightnessSlider->maximum() / 2;
+
+    double brightnessScale = 1000 * std::pow(2.0, brightnessVal/(double)20.0);
+
+    bitmapData = BMP::mapToBytePerChannel(lastImage, brightnessScale);
+
+    scene.clear();
+    QImage image(renderer->image_width, renderer->image_height, QImage::Format_RGB888);
+    //std::cerr << "image size: " << std::to_string(image.sizeInBytes()) << "\n";
+    std::size_t imageSize = 3 * renderer->image_width * renderer->image_height;
+    memcpy(image.bits(), bitmapData.data(), std::min(imageSize, bitmapData.size()));
+    QPixmap pm = QPixmap::fromImage(image);
+    scene.addPixmap(pm);
+}
+
+void MainWindow::on_brightnessSlider_valueChanged(int value)
+{
+    updateGraphicsScene();
 }
