@@ -28,8 +28,9 @@ find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 include_directories(
-    ../../common
-    ../../TheRestOfYourLife
+    ../../MyRt/common
+    ../../MyRt/hittables
+    ../../MyRt
 )
 
 add_definitions(
@@ -49,7 +50,7 @@ else()
     mainwindow.cpp
     mainwindow.h
     mainwindow.ui
-    ../../TheRestOfYourLife/renderer.cpp
+    ../../MyRt/render/renderer.cpp
   )
 endif()
 

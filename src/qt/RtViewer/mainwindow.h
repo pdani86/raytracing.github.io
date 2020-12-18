@@ -8,7 +8,7 @@
 #include <chrono>
 #include <vector>
 
-#include "../../TheRestOfYourLife/renderer.h"
+#include "../../MyRt/render/renderer.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

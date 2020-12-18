@@ -5,7 +5,11 @@
 
 #include <QThread>
 
+#include "vec3.h"
+#include "camera.h"
 #include "world_example.h"
+
+#include "bmp.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     //point3 lookAt(0.0, 0.0, 1.0);
     point3 lookUp(0.0, 1.0, 0.0);
 
-    point3 lookFrom(278, 200, -700);
+    point3 lookFrom(278, 600, -600);
     point3 lookAt(555/2, 555/2, 552/2);
 
     double vFovDegree = 50.0;
@@ -37,7 +41,7 @@ MainWindow::MainWindow(QWidget *parent)
                 aperture, focus_dist
                 );
     auto world_and_lights = createExampleWorld();
-    renderer = make_shared<Renderer>(width, height, cam);
+    renderer = std::make_shared<Renderer>(width, height, cam);
     renderer->background = color(0.0, 0.0, 0.0);
     renderer->max_depth = 1; // ray bounce limit
     renderer->samples_per_pixel = 1;
