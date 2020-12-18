@@ -5,6 +5,7 @@
 #include "hittable_list.h"
 #include "material.h"
 #include "heightmap.h"
+#include "light.h"
 //#include "film.h"
 
 #include <iostream>
@@ -22,7 +23,40 @@ inline hittable_list cornell_box() {
 using myrt::heightmap;
 using myrt::triangle;
 using myrt::hittable;
+using myrt::hittable_list;
 using myrt::point3;
+using myrt::Light;
+
+inline void _add_quad(hittable_list& list, const std::array<point3, 4>& points, bool reverse = false) {
+    // TODO: reverse CW, CCW
+    auto t1 = std::make_shared<triangle>(points[0], points[1], points[2]);
+    auto t2 = std::make_shared<triangle>(points[0], points[2], points[3]);
+    list.add(t1);
+    list.add(t2);
+}
+
+
+inline hittable_list my_box() {
+    hittable_list list;
+    constexpr double size = 100.0;
+    constexpr double halfSize = size/2.0;
+    // points: bottom-top | front-rear | left-right
+    point3 bfl(-halfSize, 0.0, -halfSize);
+    point3 brl(-halfSize, 0.0, halfSize);
+    point3 brr(halfSize, 0.0, halfSize);
+    point3 bfr(-halfSize, 0.0, -halfSize);
+
+    point3 tfl(-halfSize, size, -halfSize);
+    point3 trl(-halfSize, size, halfSize);
+    point3 trr(halfSize, size, halfSize);
+    point3 tfr(-halfSize, size, -halfSize);
+    _add_quad(list, {bfl, brl, brr, bfr});
+    _add_quad(list, {tfl, trl, trr, tfr}, true);
+    _add_quad(list, {bfl, tfl, trl, brl});
+    _add_quad(list, {bfr, tfr, trr, brr}, true);
+
+    return list;
+}
 
 inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
     auto heightmap0 = std::make_shared<heightmap>(20, 20/*, std::make_shared<metal>(color(0.95, 0.95, 0.95), 0.0)*/);
@@ -47,20 +81,11 @@ inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
     return heightmap0;
 }
 
-inline std::pair<shared_ptr<hittable_list>, std::vector<point3>> createExampleWorld() {
+inline std::pair<shared_ptr<hittable_list>, std::vector<std::shared_ptr<Light>>> createExampleWorld() {
     // World
-    const point3 lightPos(555/2, 50, 555/2);
-    auto lights = std::make_shared<hittable_list>();
-    //auto dbgMarkerSphere = make_shared<sphere>(vec3(lightPos.x(), lightPos.y()+350, lightPos.z()), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
-    //auto dbgMarkerSphere2 = make_shared<sphere>(vec3(50,50,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
-    //auto dbgMarkerSphere3 = make_shared<sphere>(vec3(150,50,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
-    //auto dbgMarkerSphere4 = make_shared<sphere>(vec3(150,350,50), 10.0, make_shared<lambertian>(color(1.0, 0.4, 0.3)));
-    auto triangle0 = std::make_shared<triangle>(point3(50, 50, 50), point3(150, 50, 50), point3(150, 350, 50));
-    //triangle0->mat = std::make_shared<lambertian>(color(1.0, 0.4, 0.3));
+    const point3 lightPos(0.0, 10.0, 0.0);
     auto world = std::make_shared<hittable_list>(/*cornell_box()*/);
-    /*world->add(dbgMarkerSphere2);
-    world->add(dbgMarkerSphere3);
-    world->add(dbgMarkerSphere4);*/
+    world->add(std::make_shared<hittable_list>(my_box()));
     int blockSquareSize = 80;
     int filmSize = 555/2;
 
@@ -74,8 +99,6 @@ inline std::pair<shared_ptr<hittable_list>, std::vector<point3>> createExampleWo
                 1000
           );
 
-    //world.add(dbgMarkerSphere);
-    //film0->mat = make_shared<lambertian>(color(1.0, 0.4, 0.3));
     world->add(film0);
     auto blockRect = make_shared<xz_rect>(
                       lightPos.x() - blockSquareSize/2, lightPos.x() + blockSquareSize/2,
@@ -85,12 +108,13 @@ inline std::pair<shared_ptr<hittable_list>, std::vector<point3>> createExampleWo
 
     //world.add(blockRect);*/
     world->add(heightmap0);
-    //world->add(triangle0);
 
-    std::pair<std::shared_ptr<hittable_list>, std::vector<point3>> result;
+    std::pair<std::shared_ptr<hittable_list>, std::vector<std::shared_ptr<Light>>> result;
     result.first = world;
-    result.second = std::vector<point3>();
-    result.second.push_back(lightPos);
+    result.second = std::vector<std::shared_ptr<Light>>();
+    auto light = std::make_shared<Light>(lightPos);
+    auto light2 = std::make_shared<Light>(point3(0.0, 99.5, 0.0));
+    result.second.emplace_back(light);
     return result;
 }
 

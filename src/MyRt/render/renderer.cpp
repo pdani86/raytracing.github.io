@@ -66,7 +66,7 @@ color Renderer::ray_color(const ray& r, int depth) {
 
     color directLightSum;
     for(auto& curLight : lights) {
-        vec3 dir = curLight - rec.p;
+        vec3 dir = curLight->pos - rec.p;
         double dist = dir.length();
         ray toLight(rec.p, dir/dist);
         hit_record light_hit;
@@ -74,7 +74,7 @@ color Renderer::ray_color(const ray& r, int depth) {
         double cosLight = dot(rec.normal, dir);
         cosLight /= dist;
         if(cosLight < 0) continue;
-        directLightSum += cosLight * color(1.0, 1.0, 1.0);
+        directLightSum += cosLight * curLight->getColor(dir);
     }
 
     color emitted;

@@ -16,6 +16,7 @@
 #include "hittable.h"
 #include "hittable_list.h"
 #include "material.h"
+#include "light.h"
 
 using myrt::color;
 using myrt::camera;
@@ -26,6 +27,7 @@ using myrt::hittable;
 using myrt::hittable_list;
 using myrt::hit_record;
 using myrt::infinity;
+using myrt::Light;
 using myrt::dot;
 using myrt::cross;
 
@@ -67,7 +69,7 @@ public:
     color background;
     std::shared_ptr<hittable> world;
     int max_depth = 20;
-    std::vector<point3> lights;
+    std::vector<std::shared_ptr<Light>> lights;
 
     std::unique_lock<std::mutex> lockImage() { return std::unique_lock<std::mutex>(imageMutex); }
 private:

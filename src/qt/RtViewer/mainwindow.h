@@ -22,6 +22,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void updateCamUi();
+    void setCamFromUi();
+
 signals:
     void renderCompletion();
     void signal_updateImage();

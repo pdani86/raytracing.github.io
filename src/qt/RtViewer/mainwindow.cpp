@@ -27,8 +27,8 @@ MainWindow::MainWindow(QWidget *parent)
     //point3 lookAt(0.0, 0.0, 1.0);
     point3 lookUp(0.0, 1.0, 0.0);
 
-    point3 lookFrom(278, 600, -600);
-    point3 lookAt(555/2, 555/2, 552/2);
+    point3 lookFrom(0.0, 75.0, -400.0);
+    point3 lookAt(0.0, 50.0, 0.0);
 
     double vFovDegree = 50.0;
 
@@ -59,6 +59,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
+    setCamFromUi();
+
     if(renderThread.joinable())
         renderThread.join();
     renderThread = std::thread([=]() {
@@ -101,4 +103,28 @@ void MainWindow::on_updateImageSignal() {
 void MainWindow::on_stopButton_clicked()
 {
     renderer->requestRenderStop();
+}
+
+void MainWindow::updateCamUi() {
+
+}
+
+void MainWindow::setCamFromUi() {
+    vec3 lookFrom(ui->camX->value(), ui->camY->value(), ui->camZ->value());
+    vec3 lookAt(ui->lookX->value(), ui->lookY->value(), ui->lookZ->value());
+    vec3 lookUp(0.0, 1.0, 0.0);
+    double vFov = ui->vFov->value();
+    double aspect = 1.0;
+    double focusDist = 10.0;
+
+    renderer->max_depth = ui->maxRayBounce->value();
+
+    renderer->cam.update(
+                lookFrom,
+                lookAt,
+                lookUp,
+                vFov,
+                aspect,
+                focusDist
+                );
 }
