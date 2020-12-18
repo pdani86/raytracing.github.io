@@ -7,7 +7,6 @@
 #include "hittable_list.h"
 
 #include "triangle.h"
-//#include "sphere.h"
 #include "material.h"
 
 #include <memory>
@@ -18,11 +17,11 @@ using std::shared_ptr;
 
 namespace myrt {
 
-class heightmap : public hittable {
+class Heightmap : public hittable {
 
 public:
 
-    heightmap(int x, int y) {
+    Heightmap(int x, int y) {
         map_data.resize(y);
         for(auto& line : map_data) {
             line.resize(x);
@@ -49,11 +48,11 @@ public:
 
     std::vector<std::vector<double>> map_data;
 
-    double step = 5.0;
+    double step = 1.0;
     double heightScale = 1.0;
 };
 
-inline void heightmap::generateGeometry(vec3 translate) {
+inline void Heightmap::generateGeometry(vec3 translate) {
     geometry->clear();
     if(map_data.size()==0) return;
     if(map_data.at(0).size() == 0) return;
@@ -74,8 +73,8 @@ inline void heightmap::generateGeometry(vec3 translate) {
             p3 += translate;
             p4 += translate;
 
-            auto newTriangle1 = std::make_shared<triangle>(p1,p2,p3);
-            auto newTriangle2 = std::make_shared<triangle>(p1,p3,p4);
+            auto newTriangle1 = std::make_shared<Triangle>(p1,p2,p3);
+            auto newTriangle2 = std::make_shared<Triangle>(p1,p3,p4);
             //newTriangle1->mat = std::make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
             //newTriangle2->mat = std::make_shared<metal>(color(0.95, 0.92, 0.9), 0.0);
             geometry->add(newTriangle1);
@@ -84,7 +83,7 @@ inline void heightmap::generateGeometry(vec3 translate) {
     }
 }
 
-inline void heightmap::generateData(std::function<double(double,double)> func) {
+inline void Heightmap::generateData(std::function<double(double,double)> func) {
     if(map_data.size()==0) return;
     if(map_data.at(0).size() == 0) return;
     const auto ySize = map_data.size();
@@ -96,7 +95,7 @@ inline void heightmap::generateData(std::function<double(double,double)> func) {
     }
 }
 
-inline void heightmap::generateParabolaData() {
+inline void Heightmap::generateParabolaData() {
     if(map_data.size()==0) return;
     if(map_data.at(0).size() == 0) return;
     const auto ySize = map_data.size();
@@ -111,12 +110,12 @@ inline void heightmap::generateParabolaData() {
     });
 }
 
-inline bool heightmap::hit(
+inline bool Heightmap::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
     return geometry->hit(r, t_min, t_max, rec);
 }
 
-inline bool heightmap::bounding_box(double time0, double time1, aabb& output_box) const {
+inline bool Heightmap::bounding_box(double time0, double time1, aabb& output_box) const {
     return geometry->bounding_box(time0, time1, output_box);
 }
 /*

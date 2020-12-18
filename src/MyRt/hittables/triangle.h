@@ -1,24 +1,20 @@
 #ifndef TRIANGLE_H
 #define TRIANGLE_H
 
-//#include "rtweekend.h"
-
 #include "hittable.h"
 
 namespace myrt {
 
 
-class triangle : public hittable
+class Triangle : public hittable
 {
 public:
-    triangle(point3 a, point3 b, point3 c) : a(a), b(b), c(c)  {}
+    Triangle(point3 a, point3 b, point3 c) : a(a), b(b), c(c)  {}
 
-    virtual bool hit(
+    bool hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const override;
 
-    virtual bool bounding_box(double time0, double time1, aabb& output_box) const override;
-    //double pdf_value(const point3& o, const vec3& v) const override;
-    //vec3 random(const point3& o) const override;
+    bool bounding_box(double time0, double time1, aabb& output_box) const override;
 
     point3 a;
     point3 b;
@@ -27,7 +23,7 @@ public:
     //std::shared_ptr<material> mat;
 };
 
-inline bool triangle::hit(
+inline bool Triangle::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
     vec3 ab = b - a;
     vec3 bc = c - b;
@@ -80,20 +76,11 @@ inline bool triangle::hit(
     return true;
 }
 
-inline bool triangle::bounding_box(double time0, double time1, aabb& output_box) const {
+inline bool Triangle::bounding_box(double time0, double time1, aabb& output_box) const {
     output_box.maximum = a.maxCoords(b.maxCoords(c));
     output_box.minimum = a.minCoords(b.minCoords(c));
     return true;
 }
-/*
-inline double triangle::pdf_value(const point3& o, const vec3& v) const {
-    return 1.0;
-}
-
-inline vec3 triangle::random(const point3& o) const {
-    //return vec3(0.0, 0.0, 0.0);
-    return 0.333 * (a + b + c);
-}*/
 
 }
 
