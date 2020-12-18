@@ -2,6 +2,7 @@
 #define __RT_MATH_H__
 
 #include <numeric>
+#include <limits>
 
 namespace myrt {
 

@@ -4,11 +4,15 @@
 
 void Renderer::render(int lineFrom, int lineTo, std::function<bool(int,int,double)> progressFunc)  {
     AtomicCounterGuard renderThreadCounter(nRenderInProgress);
-    if(!world) {
+    if(!scene) {
+        std::cerr << "Renderer::render: No Scene\n";
+        return;
+    }
+    if(!scene->world) {
         std::cerr << "Renderer::render: No World\n";
         return;
     }
-    if(lights.empty()) {
+    if(scene->lights.empty()) {
         std::cerr << "Renderer::render: No Lights\n";
         return;
     }
@@ -37,7 +41,7 @@ void Renderer::render(int lineFrom, int lineTo, std::function<bool(int,int,doubl
                 auto u = (i + ru) / (image_width-1);
                 auto v = (j + rv) / (image_height-1);
                 ray r = cam.get_ray(u, v);
-                pixel_color += ray_color(r, max_depth);
+                pixel_color += scene->ray_color(r, max_depth);
             }
             auto pixel_ix = image_width * 3 * j + 3 * i;
             image[pixel_ix+2] = pixel_color.x();
@@ -51,40 +55,6 @@ void Renderer::render(int lineFrom, int lineTo, std::function<bool(int,int,doubl
             return;
         }
     }
-}
-
-color Renderer::ray_color(const ray& r, int depth) {
-    hit_record rec;
-
-    // If we've exceeded the ray bounce limit, no more light is gathered.
-    if (depth <= 0)
-        return color(0,0,0);
-
-    // If the ray hits nothing, return the background color.
-    if (!world->hit(r, 0.001, infinity, rec))
-        return background;
-
-    color directLightSum;
-    for(auto& curLight : lights) {
-        vec3 dir = curLight->pos - rec.p;
-        double dist = dir.length();
-        ray toLight(rec.p, dir/dist);
-        hit_record light_hit;
-        if(world->hit(toLight, 0.001, dist - 0.001, light_hit)) continue;
-        double cosLight = dot(rec.normal, dir);
-        cosLight /= dist;
-        if(cosLight < 0) continue;
-        directLightSum += cosLight * curLight->getColor(dir);
-    }
-
-    color emitted;
-    color ambient;
-    color diffuse;
-    color reflected;
-    //color refracted;
-    color specular;
-
-    return emitted + directLightSum;
 }
 
 

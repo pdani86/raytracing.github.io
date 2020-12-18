@@ -51,6 +51,7 @@ else()
     mainwindow.h
     mainwindow.ui
     ../../MyRt/render/renderer.cpp
+    ../../MyRt/common/scene.cpp
   )
 endif()
 

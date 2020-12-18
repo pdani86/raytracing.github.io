@@ -18,11 +18,11 @@
 namespace myrt {
 
 
-class camera {
+class Camera {
     public:
-        camera() : camera(point3(0,0,-1), point3(0,0,0), vec3(0,1,0), 40, 1, 0, 10) {}
+        Camera() : Camera(point3(0,0,-1), point3(0,0,0), vec3(0,1,0), 40, 1, 0, 10) {}
 
-        camera(
+        Camera(
             point3 lookfrom,
             point3 lookat,
             vec3   vup,

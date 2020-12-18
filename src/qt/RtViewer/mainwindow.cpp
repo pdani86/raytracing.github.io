@@ -35,18 +35,19 @@ MainWindow::MainWindow(QWidget *parent)
     double aspect = width / (double)height;
     double aperture = 0.0; // pinhole cam
     double focus_dist = 1.0; // pinhole -> irrelevant
-    camera cam(
+    Camera cam(
                 lookFrom, lookAt, lookUp,
                 vFovDegree, aspect,
                 aperture, focus_dist
                 );
     auto world_and_lights = createExampleWorld();
     renderer = std::make_shared<Renderer>(width, height, cam);
-    renderer->background = color(0.0, 0.0, 0.0);
+    renderer->scene = std::make_shared<Scene>();
+    renderer->scene->background = color(0.0, 0.0, 0.0);
     renderer->max_depth = 1; // ray bounce limit
     renderer->samples_per_pixel = 1;
-    renderer->world = world_and_lights.first;
-    renderer->lights = world_and_lights.second;
+    renderer->scene->world = world_and_lights.first;
+    renderer->scene->lights = world_and_lights.second;
 
     connect(this, SIGNAL(renderCompletion()), this, SLOT(on_renderComplete()), Qt::QueuedConnection);
     connect(this, SIGNAL(signal_updateImage()), this, SLOT(on_updateImageSignal()), Qt::QueuedConnection);
