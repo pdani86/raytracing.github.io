@@ -45,8 +45,7 @@ public:
 
 public:
     shared_ptr<hittable_list> geometry;
-    //shared_ptr<material> material;
-
+    aabb boundingBox;
     std::vector<std::vector<double>> map_data;
 
     double step = 1.0;
@@ -85,6 +84,8 @@ inline void Heightmap::generateGeometry(vec3 translate) {
             geometry->add(newTriangle2);
         }
     }
+
+    bounding_box(0.0, 0.0, boundingBox);
 }
 
 inline void Heightmap::generateData(std::function<double(double,double)> func) {
@@ -116,6 +117,7 @@ inline void Heightmap::generateParabolaData() {
 
 inline bool Heightmap::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
+    if(!boundingBox.hit(r, t_min, t_max)) return false;
     bool didHit = geometry->hit(r, t_min, t_max, rec);
     rec.materialId = materialId;
     return didHit;
