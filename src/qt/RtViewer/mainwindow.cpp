@@ -62,7 +62,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
-    if(pFilm) pFilm->clear();
+    //if(pFilm) pFilm->clear();
     setCamFromUi();
     renderer->image_width = ui->resX->value();
     renderer->image_height = ui->resY->value();
@@ -199,4 +199,23 @@ void MainWindow::on_toggleViewBtn_clicked()
 {
     bShowFilm = !bShowFilm;
     updateGraphicsScene();
+}
+
+void MainWindow::processFilm() {
+    if(!pFilm) return;
+    pFilm->clear();
+    pFilm->disableHit = true;
+    pFilm->disableRecord = false;
+    myrt::RaySourcePoint raySource;
+    raySource.position = point3(0.0, 40.0, 0.0);
+    raySource.shootRays(*renderer->scene->world, 10);
+    pFilm->disableHit = false;
+    pFilm->disableRecord = true;
+    updateGraphicsScene();
+    std::cerr << "film hitcount: " << std::to_string(pFilm->hitCount) << std::endl;
+}
+
+void MainWindow::on_calcFilmBtn_clicked()
+{
+    processFilm();
 }

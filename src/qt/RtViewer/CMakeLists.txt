@@ -52,6 +52,7 @@ else()
     mainwindow.ui
     ../../MyRt/render/renderer.cpp
     ../../MyRt/common/scene.cpp
+    ../../MyRt/common/ray_source.cpp
   )
 endif()
 

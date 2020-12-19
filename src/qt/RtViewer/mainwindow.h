@@ -31,6 +31,8 @@ public:
     QImage getCurrentImage();
     QImage getCurrentFilmImage();
 
+    void processFilm();
+
 signals:
     void renderCompletion();
     void signal_updateImage();
@@ -48,6 +50,8 @@ private slots:
     void on_saveImageBtn_clicked();
 
     void on_toggleViewBtn_clicked();
+
+    void on_calcFilmBtn_clicked();
 
 private:
     Ui::MainWindow *ui;

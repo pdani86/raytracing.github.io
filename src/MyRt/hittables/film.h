@@ -30,6 +30,7 @@ public:
     void clear() {
         //memset(pixelData.data(), 0, pixelData.size() * sizeof(decltype(pixelData)::value_type));
         memset((char*)pixelData.data(), 0, pixelData.size() * sizeof(pixel));
+        hitCount = 0;
     }
 
     bool hit(
@@ -44,12 +45,15 @@ public:
     mutable std::vector<pixel> pixelData; // TODO: not threadsafe
     int side1res = 1000;
     int side2res = 1000;
+    bool disableHit = false;
+    bool disableRecord = true;
 
     mutable std::atomic_uint64_t hitCount{0};
 };
 
 inline bool film::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
+    if(disableHit && disableRecord) return false;
     vec3 normal = cross(side1, side2);
     auto normalLen = normal.length();
     if(normalLen < 0.0001) return false;
@@ -72,17 +76,7 @@ inline bool film::hit(
     if(v < 0) return false;
     if(u>1.0) return false;
     if(v>1.0) return false;
-    int uCoord = u * side1res;
-    int vCoord = v * side2res;
-    if(uCoord>=side1res) return false;
-    if(vCoord>=side2res) return false;
-    int ix = side1res * vCoord + uCoord;
-    if(ix>= pixelData.size()) {
-        return false;
-    }
-    double cosRayNormal = den;
-    //pixelData[ix] += 1.0;
-    pixelData[ix] += cosRayNormal;
+
     rec.normal = normal;
     rec.t = t;
     rec.p = hitPoint;
@@ -90,8 +84,22 @@ inline bool film::hit(
     rec.v = v;
     rec.materialId = -1;
     rec.front_face = true;
-    ++hitCount;
-    return true;
+
+    if(!disableRecord) {
+        int uCoord = u * side1res;
+        int vCoord = v * side2res;
+        if(uCoord>=side1res) return false;
+        if(vCoord>=side2res) return false;
+        int ix = side1res * vCoord + uCoord;
+        if(ix < pixelData.size()) {
+            double cosRayNormal = den;
+            //pixelData[ix] += 1.0;
+            pixelData[ix] += cosRayNormal;
+            ++hitCount;
+        }
+    }
+
+    return !disableHit;
 }
 
 inline bool film::bounding_box(double time0, double time1, aabb& output_box) const {

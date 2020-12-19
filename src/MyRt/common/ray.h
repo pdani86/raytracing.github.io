@@ -12,9 +12,15 @@
 //==============================================================================================
 
 #include "vec3.h"
+#include <memory>
 
 namespace myrt
 {
+
+struct RayDataBase
+{
+    virtual int getType() = 0;
+};
 
 class ray {
     public:
@@ -39,7 +45,7 @@ class ray {
         point3 orig;
         vec3 dir;
         double tm;
-        vec3 forwardLight;
+        std::shared_ptr<RayDataBase> data;
 };
 
 }

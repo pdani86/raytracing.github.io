@@ -10,6 +10,7 @@
 #include "sphere.h"
 #include "triangle_smooth.h"
 #include "film.h"
+#include "ray_source.h"
 
 #include <iostream>
 #include <chrono>
@@ -28,6 +29,7 @@ using myrt::Triangle;
 using myrt::hittable;
 using myrt::hittable_list;
 using myrt::point3;
+using myrt::vec3;
 using myrt::Light;
 using myrt::color;
 using myrt::Material;
@@ -91,6 +93,7 @@ inline std::shared_ptr<hittable> createHeightMap(const point3 heightmapPos) {
         dy *= 2.5;
 
         double val = ((dx*dx + dy*dy) * 0.1 /*+ std::cos(2*M_PI*(dx+dy)/40.0) * 15.0*/);
+
         if(val < minVal) val = minVal;
         if(val > maxVal) val = maxVal;
         return val;
@@ -171,13 +174,14 @@ inline Scene createExampleWorld(std::shared_ptr<film>& filmSurface) {
 
     auto heightmap0 = createHeightMap(heightmapPos);
 
-    constexpr double filmSize = 160.0;
+    constexpr double filmSize = 120.0;
     auto film0 = std::make_shared<film>(
                 point3(0.0 - filmSize*0.5, 190.0, 0.0 - filmSize*0.5),
+                //point3(0.0 - filmSize*0.5, 90.0, 0.0 - filmSize*0.5),
                 vec3(1.0 * filmSize, 0.0, 0.0),
                 vec3(0.0, 0.0, 1.0 * filmSize),
-                1000,
-                1000
+                500,
+                500
           );
     filmSurface = film0;
     world->add(film0);
@@ -202,6 +206,7 @@ inline Scene createExampleWorld(std::shared_ptr<film>& filmSurface) {
     //result.second.emplace_back(light3);
 
     Scene resultScene;
+    resultScene.background = color(0.1, 0.1, 0.1);
     resultScene.world = world;
     resultScene.lights = lights;
     resultScene.materials = getExampleMaterials();
