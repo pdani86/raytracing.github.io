@@ -1,13 +1,13 @@
 #ifndef FILM_H
 #define FILM_H
 
-#include "rtweekend.h"
 #include "hittable.h"
 
 #include <vector>
 #include <mem.h>
 #include <atomic>
 
+namespace myrt {
 
 class film : public hittable {
 public:
@@ -36,10 +36,8 @@ public:
         const ray& r, double t_min, double t_max, hit_record& rec) const override;
 
     bool bounding_box(double time0, double time1, aabb& output_box) const override;
-    double pdf_value(const point3& o, const vec3& v) const override;
-    vec3 random(const point3& o) const override;
 
-    shared_ptr<material> mat;
+    std::shared_ptr<material> mat;
     point3 corner;
     vec3 side1{1.0, 0.0, 0.0};
     vec3 side2{0.0, 0.0, 1.0};
@@ -50,7 +48,7 @@ public:
     mutable std::atomic_uint64_t hitCount{0};
 };
 
-bool film::hit(
+inline bool film::hit(
         const ray& r, double t_min, double t_max, hit_record& rec) const {
     vec3 normal = cross(side1, side2);
     auto normalLen = normal.length();
@@ -82,19 +80,21 @@ bool film::hit(
     if(ix>= pixelData.size()) {
         return false;
     }
-    pixelData[ix] += 1.0;
+    double cosRayNormal = den;
+    //pixelData[ix] += 1.0;
+    pixelData[ix] += cosRayNormal;
     rec.normal = normal;
     rec.t = t;
     rec.p = hitPoint;
     rec.u = u;
     rec.v = v;
-    rec.mat_ptr = mat;
+    rec.materialId = -1;
     rec.front_face = true;
     ++hitCount;
     return true;
 }
 
-bool film::bounding_box(double time0, double time1, aabb& output_box) const {
+inline bool film::bounding_box(double time0, double time1, aabb& output_box) const {
     output_box.maximum = vec3(
                 std::max(corner.x() + side1.x(), corner.x() + side2.x()),
                 std::max(corner.y() + side1.y(), corner.y() + side2.y()),
@@ -108,13 +108,6 @@ bool film::bounding_box(double time0, double time1, aabb& output_box) const {
     return true;
 }
 
-
-double film::pdf_value(const point3& o, const vec3& v) const {
-    return 0.0;
-}
-
-vec3 film::random(const point3& o) const {
-    return random_unit_vector();
 }
 
 #endif // FILM_H

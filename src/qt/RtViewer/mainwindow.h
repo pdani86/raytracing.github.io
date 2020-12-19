@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../../MyRt/render/renderer.h"
+#include "../../MyRt/hittables/film.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,6 +29,7 @@ public:
     void updateGraphicsScene();
 
     QImage getCurrentImage();
+    QImage getCurrentFilmImage();
 
 signals:
     void renderCompletion();
@@ -45,9 +47,13 @@ private slots:
 
     void on_saveImageBtn_clicked();
 
+    void on_toggleViewBtn_clicked();
+
 private:
     Ui::MainWindow *ui;
 
+    std::shared_ptr<myrt::film> pFilm;
+    bool bShowFilm = false;
     std::shared_ptr<Renderer> renderer;
     std::thread renderThread;
 

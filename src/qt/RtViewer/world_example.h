@@ -9,7 +9,7 @@
 #include "scene.h"
 #include "sphere.h"
 #include "triangle_smooth.h"
-//#include "film.h"
+#include "film.h"
 
 #include <iostream>
 #include <chrono>
@@ -33,6 +33,7 @@ using myrt::color;
 using myrt::Material;
 using myrt::Scene;
 using myrt::Sphere;
+using myrt::film;
 
 inline void _add_quad(hittable_list& list, const std::array<point3, 4>& points, unsigned int matId = 0, bool reverse = false) {
     // TODO: reverse CW, CCW
@@ -69,7 +70,7 @@ inline hittable_list my_box() {
     return list;
 }
 
-inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
+inline std::shared_ptr<hittable> createHeightMap(const point3 heightmapPos) {
     auto heightmap0 = std::make_shared<Heightmap>(20, 20);
     heightmap0->step = 2.0;
     heightmap0->materialId = 3;
@@ -94,7 +95,7 @@ inline std::shared_ptr<hittable> createHeightMap(const point3 lightPos) {
         if(val > maxVal) val = maxVal;
         return val;
     });
-    heightmap0->generateGeometry(lightPos + vec3(0.0, -30.0, 0.0));
+    heightmap0->generateGeometry(heightmapPos);
     return heightmap0;
 }
 
@@ -143,13 +144,14 @@ inline std::vector<Material> getExampleMaterials() {
     return result;
 }
 
-inline Scene createExampleWorld() {
+inline Scene createExampleWorld(std::shared_ptr<film>& filmSurface) {
     // World
-    const point3 lightPos(0.0, 40.0, 0.0);
+    //const point3 lightPos(0.0, 40.0, 0.0);
+    const point3 heightmapPos(0.0, 10.0, 0.0);
     auto world = std::make_shared<hittable_list>(/*cornell_box()*/);
     world->add(std::make_shared<hittable_list>(my_box()));
     int blockSquareSize = 80;
-    int filmSize = 555/2;
+
 
     auto sphere0 = std::make_shared<Sphere>(point3(-40.0, 30.0, -50.0), 10.0);
     sphere0->materialId = 0;
@@ -167,18 +169,19 @@ inline Scene createExampleWorld() {
     world->add(sphere3);
     world->add(sphere4);
 
-    auto heightmap0 = createHeightMap(lightPos);
-/*
-    auto film0 = make_shared<film>(
-                point3(lightPos.x() - filmSize/2, lightPos.y() + 400, lightPos.z() - filmSize/2),
+    auto heightmap0 = createHeightMap(heightmapPos);
+
+    constexpr double filmSize = 160.0;
+    auto film0 = std::make_shared<film>(
+                point3(0.0 - filmSize*0.5, 190.0, 0.0 - filmSize*0.5),
                 vec3(1.0 * filmSize, 0.0, 0.0),
                 vec3(0.0, 0.0, 1.0 * filmSize),
                 1000,
                 1000
           );
-
+    filmSurface = film0;
     world->add(film0);
-    auto blockRect = make_shared<xz_rect>(
+    /*auto blockRect = make_shared<xz_rect>(
                       lightPos.x() - blockSquareSize/2, lightPos.x() + blockSquareSize/2,
                       lightPos.z() - blockSquareSize/2, lightPos.z() + blockSquareSize/2,
                       lightPos.y() + 70,

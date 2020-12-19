@@ -42,7 +42,8 @@ MainWindow::MainWindow(QWidget *parent)
                 vFovDegree, aspect,
                 aperture, focus_dist
                 );
-    auto exampleScene = createExampleWorld();
+
+    auto exampleScene = createExampleWorld(pFilm);
     renderer = std::make_shared<Renderer>(width, height, cam);
     renderer->scene = std::make_shared<Scene>();
     renderer->scene->background = color(0.0, 0.0, 0.0);
@@ -61,6 +62,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startButton_clicked()
 {
+    if(pFilm) pFilm->clear();
     setCamFromUi();
     renderer->image_width = ui->resX->value();
     renderer->image_height = ui->resY->value();
@@ -139,10 +141,30 @@ QImage MainWindow::getCurrentImage() {
     return image;
 }
 
+QImage MainWindow::getCurrentFilmImage() {
+    if(!pFilm) return QImage();
+    std::vector<unsigned char> bitmapData;
+    //bitmapData = BMP::mapToBytePerChannelNormalize(renderResult);
+    int brightnessVal = ui->brightnessSlider->value() - ui->brightnessSlider->maximum() / 2;
+    double brightnessScale = 1000 * std::pow(2.0, brightnessVal/(double)20.0);
+    bitmapData = BMP::mapToBytePerChannel(pFilm->pixelData, brightnessScale);
+    bitmapData = BMP::grayToRGB(bitmapData);
+    QImage image(pFilm->side1res, pFilm->side2res, QImage::Format_RGB888);
+    //std::cerr << "image size: " << std::to_string(image.sizeInBytes()) << "\n";
+    std::size_t imageSize = 3 * pFilm->side1res * pFilm->side2res;
+    memcpy(image.bits(), bitmapData.data(), std::min(imageSize, bitmapData.size()));
+    return image;
+}
+
 void MainWindow::updateGraphicsScene() {
     scene.clear();
     std::vector<unsigned char> bitmapData;
-    QImage image = getCurrentImage();
+    QImage image;
+    if(bShowFilm) {
+        image = getCurrentFilmImage();
+    } else {
+        image = getCurrentImage();
+    }
     QPixmap pm = QPixmap::fromImage(image);
     scene.addPixmap(pm);
 }
@@ -171,4 +193,10 @@ void MainWindow::on_saveImageBtn_clicked()
     } else {
         QMessageBox::critical(this, "Couldn't Save Image", QString("Couldn't Save Image As %1").arg(filename));
     }
+}
+
+void MainWindow::on_toggleViewBtn_clicked()
+{
+    bShowFilm = !bShowFilm;
+    updateGraphicsScene();
 }
