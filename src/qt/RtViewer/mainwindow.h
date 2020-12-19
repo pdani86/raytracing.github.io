@@ -53,6 +53,8 @@ private slots:
 
     void on_calcFilmBtn_clicked();
 
+    void on_scaleSlider_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
 

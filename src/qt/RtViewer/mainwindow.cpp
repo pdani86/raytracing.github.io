@@ -208,7 +208,7 @@ void MainWindow::processFilm() {
     pFilm->disableRecord = false;
     myrt::RaySourcePoint raySource;
     raySource.position = point3(0.0, 40.0, 0.0);
-    raySource.shootRays(*renderer->scene->world, 10);
+    raySource.shootRays(*renderer->scene->world, 8);
     pFilm->disableHit = false;
     pFilm->disableRecord = true;
     updateGraphicsScene();
@@ -218,4 +218,11 @@ void MainWindow::processFilm() {
 void MainWindow::on_calcFilmBtn_clicked()
 {
     processFilm();
+}
+
+void MainWindow::on_scaleSlider_valueChanged(int value)
+{
+    double scale = std::pow(10, value/1000.0);
+    ui->graphicsView->resetTransform();
+    ui->graphicsView->scale(scale, scale);
 }

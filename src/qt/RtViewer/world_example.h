@@ -73,8 +73,8 @@ inline hittable_list my_box() {
 }
 
 inline std::shared_ptr<hittable> createHeightMap(const point3 heightmapPos) {
-    auto heightmap0 = std::make_shared<Heightmap>(20, 20);
-    heightmap0->step = 2.0;
+    auto heightmap0 = std::make_shared<Heightmap>(40, 40);
+    heightmap0->step = 1.0;
     heightmap0->materialId = 3;
 
     const auto ySize = heightmap0->map_data.size();
@@ -92,7 +92,10 @@ inline std::shared_ptr<hittable> createHeightMap(const point3 heightmapPos) {
         dx *= 2.5;
         dy *= 2.5;
 
-        double val = ((dx*dx + dy*dy) * 0.1 /*+ std::cos(2*M_PI*(dx+dy)/40.0) * 15.0*/);
+        //double val = maxVal - ((dx*dx + dy*dy) * 0.1);
+        double val = (dx*dx + dy*dy) * 0.1;
+        //double val = ((dx*dx + dy*dy) * 0.1 /*+ std::cos(2*M_PI*(dx+dy)/40.0) * 15.0*/);
+        //double val = /*((dx*dx + dy*dy) * 0.03 +*/ std::cos(2*M_PI*(dx*dy)/40.0) * 0.2;
 
         if(val < minVal) val = minVal;
         if(val > maxVal) val = maxVal;
@@ -180,8 +183,8 @@ inline Scene createExampleWorld(std::shared_ptr<film>& filmSurface) {
                 //point3(0.0 - filmSize*0.5, 90.0, 0.0 - filmSize*0.5),
                 vec3(1.0 * filmSize, 0.0, 0.0),
                 vec3(0.0, 0.0, 1.0 * filmSize),
-                500,
-                500
+                100,
+                100
           );
     filmSurface = film0;
     world->add(film0);
